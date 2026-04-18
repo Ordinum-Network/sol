@@ -7,14 +7,14 @@ pub struct Trial {
    pub sponsor: Pubkey,
    pub site: String,
    pub title: String,
-   pub ownerAuthority: String,
-   pub currentPhase: u8,
-   pub totalPhases: u8,
+   pub owner_authority: String,
+   pub current_phase: u8,
+   pub total_phases: u8,
    pub status: TrialStatus,
-   pub amendmentCount: u8,
-   pub startDate: i64,
-   pub endDate: i64,
-   pub createdDate: i64,
+   pub amendment_count: u8,
+   pub start_date: i64,
+   pub end_date: i64,
+   pub created_date: i64,
    pub bump: u8
 }
 

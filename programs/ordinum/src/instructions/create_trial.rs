@@ -3,52 +3,52 @@ use crate::{constants::{SPONSOR_SEED, TRIAL_SEED}, errors::*, states::{Sponsor, 
 
 pub fn create_trial(
     ctx: Context<CreateTrial>, 
-    trialName: String, 
-    name: String,
-    currentPhase: u8,
-    totalPhases: u8,
-    startDate: i64,
-    endDate: i64
+    trial_id: String, 
+    sponsor_title: String,
+    total_phases: u8,
+    start_date: i64,
+    end_date: i64
 ) -> Result<()> {
   let trial = &mut ctx.accounts.trial_account;
  
   require!(
-    endDate > startDate,
+    end_date > start_date,
     OrdinumError::InvalidDate
   );
  
-  trial.trial_id = trialName.clone();
-  trial.sponsor = ctx.accounts.signer.key();
-  trial.title = trialName;
-  trial.currentPhase = currentPhase;
-  trial.totalPhases = totalPhases;
+  trial.trial_id = trial_id.clone();
+  trial.sponsor = ctx.accounts.sponsor_account.key();
+  trial.title = trial_id;
+  trial.current_phase = 0;
+  trial.total_phases = total_phases;
   trial.status = TrialStatus::Draft;
-  trial.amendmentCount = 0;
-  trial.startDate = startDate;
-  trial.endDate = endDate;
-  trial.createdDate = Clock::get()?.unix_timestamp;
+  trial.amendment_count = 0;
+  trial.start_date = start_date;
+  trial.end_date = end_date;
+  trial.created_date = Clock::get()?.unix_timestamp;
   trial.bump = ctx.bumps.trial_account;
+  trial.owner_authority = ctx.accounts.sponsor_account.sponsor_title.clone();
 
   Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(trial_id: String, name: String)]
+#[instruction(trial_id: String, sponsor_title: String)]
 pub struct CreateTrial<'info> {
    #[account(
-    init, 
-    payer = signer,
-    space=Trial::SIZE, 
-    seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes()], 
-    bump)]
-   pub trial_account: Account<'info, Trial>,
-
-   #[account(
-    seeds=[SPONSOR_SEED, signer.key().as_ref(), name.as_bytes()],
+    seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
     bump,
     constraint = sponsor_account.authority == signer.key() @ OrdinumError::Unauthorized
    )]
    pub sponsor_account: Account<'info, Sponsor>,
+  
+   #[account(
+    init, 
+    payer = signer,
+    space=Trial::SIZE, 
+    seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()], 
+    bump)]
+   pub trial_account: Account<'info, Trial>,
   
    #[account(mut)]
    pub signer: Signer<'info>,

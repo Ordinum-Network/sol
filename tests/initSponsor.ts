@@ -35,7 +35,7 @@ describe("init sponsor", () => {
 
         // assertionn tests
         assert.equal(account.authority.toBase58(), signer.publicKey.toBase58());
-        assert.equal(account.name, name)
+        assert.equal(account.sponsorTitle, name)
         assert.equal(account.verified, false);
         assert.ok(account.trialCount.eq(new BN(0)));
         assert.equal(account.bump, bump);

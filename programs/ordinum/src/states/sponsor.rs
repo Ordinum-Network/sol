@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 // #[derive(InitSpace)]
 pub struct Sponsor {
    pub authority: Pubkey,
-   pub name: String, 
+   pub sponsor_title: String, 
    pub trial_count: u64,
    pub verified: bool,
    pub created_at: i64,
