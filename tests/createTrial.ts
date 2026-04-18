@@ -58,10 +58,11 @@ describe("create trial", () => {
 
         const trialAccount = await program.account.trial.fetch(trialPDA);
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
+        assert.equal(trialAccount.title, trial.trialId);
     })
 })
 
-export const getProgramPDA = async(signer: Wallet, program: anchor.Program<Ordinum>, name: String) => {
+export const getProgramPDA = async(signer: Wallet, program: anchor.Program<Ordinum>, name: string) => {
     const [sponsorPda] = anchor.web3.PublicKey.findProgramAddressSync(
     [
         Buffer.from(SPONSOR_SEED),
@@ -76,7 +77,7 @@ export const getProgramPDA = async(signer: Wallet, program: anchor.Program<Ordin
     return { sponsorPda, sponsorAcc };
   } catch (e) {
     await program.methods
-      .initSponsor("pFizer")
+      .initSponsor(name)
       .accounts({
         signer: signer.publicKey,
       })
