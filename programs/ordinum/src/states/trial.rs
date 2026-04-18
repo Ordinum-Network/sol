@@ -7,6 +7,7 @@ pub struct Trial {
    pub sponsor: Pubkey,
    pub site: String,
    pub title: String,
+   pub ownerAuthority: String,
    pub currentPhase: u8,
    pub totalPhases: u8,
    pub status: TrialStatus,
@@ -31,7 +32,7 @@ impl Trial {
       + 32              // sponsor
       + (4 + 100)       //site
       + (4 + 200)       //title
-      
+      + (4 + 200)       //ownerTitle
       + 1               // currentPhase
       + 1               //totalPhases
       + 1               //status
