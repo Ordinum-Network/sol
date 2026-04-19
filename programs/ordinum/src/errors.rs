@@ -9,5 +9,8 @@ pub enum OrdinumError {
     InvalidDate,
 
     #[msg("Unauthorized")]
-    Unauthorized
+    Unauthorized,
+
+    #[msg("Trial Not Initialised")]
+    InvalidTrial,
 }
