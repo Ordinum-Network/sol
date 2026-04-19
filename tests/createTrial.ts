@@ -1,9 +1,9 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Ordinum } from "../target/types/ordinum";
-import { SPONSOR_SEED, TRIAL_SEED } from "./utils/constants";
-import { Wallet } from "@coral-xyz/anchor/dist/cjs/provider";
+import { TRIAL_SEED } from "./utils/constants";
 import { assert } from "chai";
 import { BN } from "bn.js";
+import { getProgramPDA } from "./helpers/getSponsor";
 
 describe("create trial", () => {
     const provider = anchor.AnchorProvider.env();
@@ -61,30 +61,4 @@ describe("create trial", () => {
         assert.equal(trialAccount.title, trial.trialId);
     })
 })
-
-export const getProgramPDA = async(signer: Wallet, program: anchor.Program<Ordinum>, name: string) => {
-    const [sponsorPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [
-        Buffer.from(SPONSOR_SEED),
-        signer.publicKey.toBuffer(),
-        Buffer.from(name)
-    ],
-    program.programId
-   );
-
-    try {
-    const sponsorAcc = await program.account.sponsor.fetch(sponsorPda);
-    return { sponsorPda, sponsorAcc };
-  } catch (e) {
-    await program.methods
-      .initSponsor(name)
-      .accounts({
-        signer: signer.publicKey,
-      })
-      .rpc();
-
-    const sponsorAcc = await program.account.sponsor.fetch(sponsorPda);
-    return { sponsorPda, sponsorAcc };
-  }
-}
 
