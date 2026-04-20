@@ -5,3 +5,4 @@ pub mod trial;
 pub use trial::*;
 
 pub mod escrow;
+pub use escrow::*;

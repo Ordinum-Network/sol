@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { BN } from "bn.js";
 import { getProgramPDA } from "./helpers/getSponsor";
 
-describe("create trial", () => {
+describe("trial", () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
 

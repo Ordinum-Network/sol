@@ -4,7 +4,7 @@ import { SPONSOR_SEED } from "./utils/constants";
 import { assert } from "chai";
 import { BN } from "bn.js";
 
-describe("init sponsor", () => {
+describe("sponsor", () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
 

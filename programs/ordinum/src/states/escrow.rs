@@ -2,13 +2,13 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct Escrow {
-   sponsor: Pubkey,
-   trial: Pubkey,
-   usdc_mint: Pubkey,
-   initial_deposit: u64,
-   total_deposit: u64,
-   balance: u64,
-   bump: u8,
+   pub sponsor: Pubkey,
+   pub trial: Pubkey,
+   pub usdc_mint: Pubkey,
+   pub initial_deposit: u64,
+   pub total_deposit: u64,
+   pub balance: u64,
+   pub bump: u8,
 }
 
 impl Escrow {

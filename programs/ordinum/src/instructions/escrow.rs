@@ -1,7 +1,5 @@
-use anchor_lang::prelude::system_instruction::transfer;
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::Transfer;
-use anchor_spl::token::{Mint, Token, TokenAccount, transfer};
+use anchor_spl::token::{Mint, Token, TokenAccount, Transfer, transfer};
 use anchor_spl::associated_token::AssociatedToken;
 use crate::{constants::{SPONSOR_SEED, TRIAL_SEED, ESCROW_SEED, USDC_MINT}, errors::OrdinumError, states::{Sponsor, escrow::Escrow, trial::Trial}};
 
@@ -12,7 +10,7 @@ pub fn init_escrow(
   sponsor_title: String,
   initial_deposit: u64,
 ) -> Result<()> {
-  let escrow_acc: &mut Account<'_, escrow> = &mut ctx.accounts.escrow_account;
+  let escrow_acc: &mut Account<'_, Escrow> = &mut ctx.accounts.escrow_account;
 
   escrow_acc.sponsor = ctx.accounts.signer.key();
   escrow_acc.trial = ctx.accounts.trial_account.key();
