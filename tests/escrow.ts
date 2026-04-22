@@ -3,18 +3,22 @@ import { Ordinum } from "../target/types/ordinum";
 import { assert } from "chai";
 import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
-import { TRIAL_SEED } from "./utils/constants";
+import { ESCROW_SEED, TRIAL_SEED, USDC_ADDR } from "./utils/constants";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { PublicKey } from "@solana/web3.js";
 
 describe("escrow", () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
+    const connection = provider.connection;
 
     const program = anchor.workspace.ordinum as anchor.Program<Ordinum>;
     const signer = provider.wallet
-    const sponsor: string = "pFizer2"
-    let sponsorPDA: any
-    let trialPDA: any
+    const sponsor: string = "pFizer"
+    let sponsorPDA: anchor.web3.PublicKey
+    let trialPDA: anchor.web3.PublicKey
     let trialId: string
+    let escrowPDA: anchor.web3.PublicKey
 
     it ("initialise sponsor acc", async () => {
         const result = (await getProgramPDA(signer, program, sponsor))!;
@@ -28,7 +32,7 @@ describe("escrow", () => {
     it ("create trial with associated sponsor", async() => {
         const now = Math.floor(Date.now() / 1000);
         const trial = {
-            trialId: "NOVA-Resp Trial2",
+            trialId: String(Date.now()),
             sponsorTitle: sponsor,
             totalPhases: 23,
             startDate: new BN(now),
@@ -59,19 +63,22 @@ describe("escrow", () => {
         
         trialId = trial.trialId
         const trialAccount = await program.account.trial.fetch(trialPDA);
+        console.log(trialAccount.sponsor.toBase58(), "llllll")
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
         assert.equal(trialAccount.title, trial.trialId);
     }) 
 
     it ("init escrow account with ATA", async() => {
-        const [escrowPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+        const [escrowPda, bump] = anchor.web3.PublicKey.findProgramAddressSync(
             [
-                Buffer.from(TRIAL_SEED),
+                Buffer.from(ESCROW_SEED),
                 Buffer.from(trialId),
                 sponsorPDA.toBuffer()
             ],
             program.programId
         )
+        escrowPDA = escrowPda
+
 
         await program.methods
               .initEscrow(
@@ -82,9 +89,21 @@ describe("escrow", () => {
               .accounts({
                 signer: signer.publicKey,
               }).rpc()
-
+       
         const escrowAcc = await program.account.escrow.fetch(escrowPDA);
         assert.isTrue(escrowAcc.trial.equals(trialPDA));      
               
+    })
+
+    it ("fetch PDA's ATA balance", async() => {
+        const pubkey = new PublicKey(USDC_ADDR)
+        const ata = await getAssociatedTokenAddress(
+            pubkey,
+            escrowPDA,
+            true
+        )
+        
+        const balance = await connection.getTokenAccountBalance(ata);
+        assert.ok(new BN(balance.value.amount).eq(new BN(100)))
     })
 })

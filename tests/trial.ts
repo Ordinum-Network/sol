@@ -15,7 +15,7 @@ describe("trial", () => {
     let sponsorPDA: any
     
     
-    it ("initialise sponsor acc", async () => {
+    it ("initialise sponsor acc in trial", async () => {
        const result = (await getProgramPDA(signer, program, sponsor))!;
        if (!result) throw new Error("Sponsor not found");
 
@@ -27,7 +27,7 @@ describe("trial", () => {
     it ("create trial with associated sponsor", async() => {
         const now = Math.floor(Date.now() / 1000);
         const trial = {
-            trialId: "NOVA-Resp Trial",
+            trialId: "NOVA-Resp Trial"+Date.now(),
             sponsorTitle: sponsor,
             totalPhases: 23,
             startDate: new BN(now),

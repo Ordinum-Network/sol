@@ -59,7 +59,7 @@ pub struct InitEscrow<'info> {
    #[account(
     seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
     bump,
-    constraint = trial_account.sponsor == signer.key() @ OrdinumError::InvalidTrial
+    constraint = trial_account.sponsor == sponsor_account.key() @ OrdinumError::InvalidTrial
    )]
    pub trial_account: Account<'info, Trial>,
 
