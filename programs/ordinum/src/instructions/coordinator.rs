@@ -73,14 +73,6 @@ pub struct InitCoordinator<'info> {
    )]
    pub coordinator_account: Account<'info, Coordinator>,
   
-  /// CHECK: manually initialized via system program CPI
-  // #[account(
-  //   mut,
-  //   seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), coordinator_pubkey.as_ref()],
-  //   bump
-  // )]
-  //  pub coordinator_account: UncheckedAccount<'info>,
-
    #[account(mut)]  
    pub signer: Signer<'info>,
    pub system_program: Program<'info, System>,
