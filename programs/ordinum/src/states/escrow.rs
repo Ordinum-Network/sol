@@ -8,6 +8,7 @@ pub struct Escrow {
    pub initial_deposit: u64,
    pub total_deposit: u64,
    pub balance: u64,
+   pub sol_balance: u64,
    pub bump: u8,
 }
 
@@ -17,8 +18,9 @@ impl Escrow {
       + 32      //sponsor
       + 32      //trial
       + 32      //usdc_mint
-      + 8       //
-      + 8       //
-      + 8
+      + 8       //initial_deposit
+      + 8       //total_deposit
+      + 8       //balance
+      + 8       //sol_balance
       + 1;
 }

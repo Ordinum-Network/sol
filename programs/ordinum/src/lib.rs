@@ -6,14 +6,17 @@ pub mod errors;
 pub mod constants;
 
 use instructions::*;
+use crate::states::enums::{CoordinatorRole, CoordinatorStatus};
 
 declare_id!("HEsXA7uhHXTTJkKNBR8Ydj4h4hmRxcX4eksVb4uMJceT");
 
 #[program]
 pub mod ordinum {
+    use crate::instructions::coordinator::InitCoordinator;
     use crate::instructions::sponsor::InitSponsor;
     use crate::instructions::escrow::InitEscrow;
     use crate::instructions::trial::CreateTrial;
+
     use super::*;
 
     pub fn init_sponsor(ctx: Context<InitSponsor>, sponsor_title: String) -> Result<()> {
@@ -24,7 +27,11 @@ pub mod ordinum {
         instructions::create_trial(ctx, trial_id, sponsor_title, total_phases, start_date, end_date)
     }
 
-    pub fn init_escrow(ctx: Context<InitEscrow>, trial_id: String, sponsor_title: String, initial_deposit: u64) -> Result<()> {
-        instructions::init_escrow(ctx, trial_id, sponsor_title, initial_deposit)
+    pub fn init_escrow(ctx: Context<InitEscrow>, trial_id: String, sponsor_title: String, initial_deposit: u64, sol_deposit: u64) -> Result<()> {
+        instructions::init_escrow(ctx, trial_id, sponsor_title, initial_deposit, sol_deposit)
+    }
+
+    pub fn init_coordinator(ctx: Context<InitCoordinator>, trial_id: String, sponsor_title: String, coordinator_pubkey: Pubkey, role: CoordinatorRole) -> Result<()> {
+        instructions::create_coordinator(ctx, trial_id, sponsor_title, coordinator_pubkey, role)
     }
 }

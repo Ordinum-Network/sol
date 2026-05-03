@@ -7,3 +7,13 @@ pub enum TrialStatus {
     Paused, 
     Completed,
 }
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
+pub enum CoordinatorRole {
+    PI, CRC, CRA
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
+pub enum CoordinatorStatus {
+    Active, Inactive
+}

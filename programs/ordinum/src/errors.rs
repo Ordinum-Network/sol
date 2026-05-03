@@ -13,4 +13,7 @@ pub enum OrdinumError {
 
     #[msg("Trial Not Initialised")]
     InvalidTrial,
+
+    #[msg("Insufficient Funds")]
+    InsufficientFunds,
 }
