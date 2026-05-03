@@ -9,6 +9,7 @@ pub fn init_escrow(
   trial_id: String,
   sponsor_title: String,
   initial_deposit: u64,
+  sol_deposit: u64,
 ) -> Result<()> {
   let escrow_acc: &mut Account<'_, Escrow> = &mut ctx.accounts.escrow_account;
 
@@ -30,6 +31,20 @@ pub fn init_escrow(
   let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
   transfer(cpi_ctx, initial_deposit)?;
+  let transfer_ix = anchor_lang::solana_program::system_instruction::transfer(
+    &ctx.accounts.signer.key(),
+    &escrow_acc.key(),
+    sol_deposit,
+  );
+
+  anchor_lang::solana_program::program::invoke(&transfer_ix, &[
+    ctx.accounts.signer.to_account_info(),
+    escrow_acc.to_account_info(),
+    ctx.accounts.system_program.to_account_info(),
+  ],)?;
+
+  escrow_acc.sol_balance = sol_deposit;
+ 
   Ok(())
 }
 
