@@ -23,13 +23,6 @@ pub fn create_coordinator(
   );
   let sponsor_key = ctx.accounts.sponsor_account.key();
   
-  let escrow_seeds = &[
-    ESCROW_SEED,
-    trial_id.as_bytes(),
-    sponsor_key.as_ref(),
-    &[escrow_account.bump],
-  ];
-  
   //reimbursing signer from escrow ----
   **ctx.accounts.escrow_account.to_account_info().try_borrow_mut_lamports()? -= coordinator_rent;
   **ctx.accounts.signer.to_account_info().try_borrow_mut_lamports()? += coordinator_rent;
@@ -43,9 +36,6 @@ pub fn create_coordinator(
   coordinator.status = CoordinatorStatus::Active;
   coordinator.assigned_at = Clock::get()?.unix_timestamp;
   coordinator.bump = ctx.bumps.coordinator_account;
-  
-  //transfer sol from escrow PDA -> coordinator acc.
-  
 
   Ok(())
 }
