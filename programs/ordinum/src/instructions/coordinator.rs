@@ -148,6 +148,7 @@ pub struct InitCoordinatorWithPI<'info> {
     mut,
     seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
     bump,
+    constraint = coordinator.role == CoordinatorRole::PI @ OrdinumError::Unauthorized,
   )]
   pub coordinator: Account<'info, Coordinator>,
 

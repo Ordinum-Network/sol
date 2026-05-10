@@ -19,8 +19,10 @@ describe("coordinator", () => {
     let trialPDA: anchor.web3.PublicKey
     let trialId: string
     let escrowPDA: anchor.web3.PublicKey
-    let coordinatorPI: anchor.web3.Keypair;
+    let coordinatorPI: anchor.web3.Keypair
     let coordinatorPIPubkey: anchor.web3.PublicKey
+    let crcPubkey: anchor.web3.PublicKey
+    let crc: anchor.web3.PublicKey
     let sponsorAccount: any
 
     it ("initialise sponsor acc", async () => {
@@ -168,7 +170,7 @@ describe("coordinator", () => {
         console.log(await connection.getBalance(sponsorAccount.authority), "Escrow After balance")
     })
     
-    it ("init coordinator PI", async() => {
+    it ("init coordinator", async() => {
         const coordinatorKeypair = anchor.web3.Keypair.generate();
         const coordinatorPubkey = coordinatorKeypair.publicKey;
         console.log(await connection.getBalance(escrowPDA), " => before transfer")
@@ -263,4 +265,129 @@ describe("coordinator", () => {
         assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
         assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
     })
+
+    it("prefund signer (sponsor)", async() => {
+        console.log(await connection.getBalance(sponsorAccount.authority), "Escrow Before balance")
+
+        await program.methods.prefundSignerAsSponsor(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: signer.publicKey,
+            sponsorAuthority: signer.publicKey
+        }).rpc()
+
+        console.log(await connection.getBalance(sponsorAccount.authority), "Escrow After balance")
+    })
+
+    it ("init coordinator (CRC)", async() => {
+        const coordinatorKeypair = anchor.web3.Keypair.generate();
+        const coordinatorPubkey = coordinatorKeypair.publicKey;
+        console.log(await connection.getBalance(escrowPDA), " => before transfer")
+
+        coordinatorPI = coordinatorKeypair;
+        coordinatorPIPubkey = coordinatorPubkey;
+        const [derivedSponsorPDA] = PublicKey.findProgramAddressSync(
+         [Buffer.from(SPONSOR_SEED), signer.publicKey.toBuffer(), Buffer.from(sponsor)],
+           program.programId
+         )
+
+
+        const [coordinatorPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+         [
+             Buffer.from(COORDINATOR_SEED),
+             trialPDA.toBuffer(),
+             coordinatorPubkey.toBuffer(),
+         ],
+         program.programId
+        );
+
+        await program.methods
+              .initCoordinator(
+                trialId,
+                sponsor,
+                coordinatorPubkey,
+                {crc:{}},
+              ).accounts({
+                signer: signer.publicKey,
+        }).rpc();
+        
+        console.log(await connection.getBalance(escrowPDA), " => after transfer")
+        const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);
+        assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
+        assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
+    })
+
+    it ("Prefund signer (CRC)", async() => {
+        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance before transfer")
+        try {
+          await program.methods.prefundSignerAsPi(
+              trialId,
+              sponsor
+          ).accounts({
+              signer: coordinatorPIPubkey,
+              sponsorAuthority: signer.publicKey
+          }).signers([coordinatorPI]).rpc()
+          assert.fail("Expected error but succeeded");
+        } catch(err: any) {
+          assert.ok(err.message.includes("Unauthorized"));
+        }
+
+        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance After transfer")
+     })
+
+     it ("init coordinator with CRC", async() => {
+        try {
+        const coordinatorKeypair = anchor.web3.Keypair.generate();
+        const coordinatorPubkey = coordinatorKeypair.publicKey;
+        console.log(await connection.getBalance(escrowPDA), " => before transfer")
+
+        await program.methods
+            .initCoordinatorWithPi(
+              trialId,
+              sponsor,
+              coordinatorPubkey,
+              {cra:{}},
+            ).accounts({
+              signer: coordinatorPIPubkey,
+              sponsorAuthority: sponsorAccount.authority
+        }).signers([coordinatorPI]).rpc();
+         assert.fail("Expected error but succeeded");
+      } catch(err: any) {
+          const isUnauthorized = err.message.includes("Unauthorized");
+          const isInsufficientFunds = err.message.includes("insufficient lamports");
+          assert.ok(isUnauthorized || isInsufficientFunds);
+      }
+     })
+     
+     it ("init coordinator with CRC", async() => {
+        try {
+        const coordinatorKeypair = anchor.web3.Keypair.generate();
+        const coordinatorPubkey = coordinatorKeypair.publicKey;
+        console.log(await connection.getBalance(escrowPDA), " => before transfer")
+        const sig = await connection.requestAirdrop(
+          coordinatorPIPubkey,
+           2 * anchor.web3.LAMPORTS_PER_SOL
+        );
+ 
+        await connection.confirmTransaction(sig);
+
+        await program.methods
+            .initCoordinatorWithPi(
+              trialId,
+              sponsor,
+              coordinatorPubkey,
+              {cra:{}},
+            ).accounts({
+              signer: coordinatorPIPubkey,
+              sponsorAuthority: sponsorAccount.authority
+        }).signers([coordinatorPI]).rpc();
+         assert.fail("Expected error but succeeded");
+      } catch(err: any) {
+          const isUnauthorized = err.message.includes("Unauthorized");
+          const isInsufficientFunds = err.message.includes("insufficient lamports");
+          assert.ok(isUnauthorized || isInsufficientFunds);
+      }
+     })
+
 })
