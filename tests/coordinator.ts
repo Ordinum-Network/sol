@@ -3,11 +3,11 @@ import { Ordinum } from "../target/types/ordinum";
 import { assert } from "chai";
 import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
-import { COORDINATOR_SEED, ESCROW_SEED, TRIAL_SEED, USDC_ADDR } from "./utils/constants";
+import { COORDINATOR_SEED, ESCROW_SEED, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR } from "./utils/constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
-describe("escrow", () => {
+describe("coordinator", () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
     const connection = provider.connection;
@@ -19,12 +19,16 @@ describe("escrow", () => {
     let trialPDA: anchor.web3.PublicKey
     let trialId: string
     let escrowPDA: anchor.web3.PublicKey
+    let coordinatorPI: anchor.web3.Keypair;
+    let coordinatorPIPubkey: anchor.web3.PublicKey
+    let sponsorAccount: any
 
     it ("initialise sponsor acc", async () => {
         const result = (await getProgramPDA(signer, program, sponsor))!;
         if (!result) throw new Error("Sponsor not found");
 
         const { sponsorPda, sponsorAcc } = result!;
+        sponsorAccount = sponsorAcc
         sponsorPDA = sponsorPda;
         assert.equal(sponsorAcc.authority.toBase58(), signer.publicKey.toBase58());
      })
@@ -63,7 +67,7 @@ describe("escrow", () => {
         
         trialId = trial.trialId
         const trialAccount = await program.account.trial.fetch(trialPDA);
-        console.log(trialAccount.sponsor.toBase58(), "llllll")
+
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
         assert.equal(trialAccount.title, trial.trialId);
     }) 
@@ -113,10 +117,69 @@ describe("escrow", () => {
         assert.ok(new BN(100*anchor.web3.LAMPORTS_PER_SOL).gte(expected));
     })
 
-    it ("init coordinator", async() => {
+    // it ("init coordinator", async() => {
+    //     const coordinatorKeypair = anchor.web3.Keypair.generate();
+    //     const coordinatorPubkey = coordinatorKeypair.publicKey;
+    //     console.log(await connection.getBalance(escrowPDA), " => before transfer")
+
+    //     coordinatorPI = coordinatorKeypair;
+    //     coordinatorPIPubkey = coordinatorPubkey;
+    //     const [derivedSponsorPDA] = PublicKey.findProgramAddressSync(
+    //      [Buffer.from(SPONSOR_SEED), signer.publicKey.toBuffer(), Buffer.from(sponsor)],
+    //        program.programId
+    //      )
+
+    //     const [coordinatorPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+    //      [
+    //          Buffer.from(COORDINATOR_SEED),
+    //          trialPDA.toBuffer(),
+    //          coordinatorPubkey.toBuffer(),
+    //      ],
+    //      program.programId
+    //     );
+
+    //     await program.methods
+    //           .initCoordinator(
+    //             trialId,
+    //             sponsor,
+    //             coordinatorPubkey,
+    //             {pi:{}},
+    //           ).accounts({
+    //             signer: signer.publicKey,
+    //     }).rpc();
+        
+    //     console.log(await connection.getBalance(escrowPDA), " => after transfer")
+    //     const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);
+    //     assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
+    //     assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
+    // })
+
+    it("prefund signer (sponsor)", async() => {
+        console.log(await connection.getBalance(sponsorAccount.authority), "Escrow Before balance")
+
+        await program.methods.prefundSignerAsSponsor(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: signer.publicKey,
+            sponsorAuthority: signer.publicKey
+        }).rpc()
+
+        console.log(await connection.getBalance(sponsorAccount.authority), "Escrow After balance")
+    })
+    
+    it ("init coordinator PI", async() => {
         const coordinatorKeypair = anchor.web3.Keypair.generate();
         const coordinatorPubkey = coordinatorKeypair.publicKey;
         console.log(await connection.getBalance(escrowPDA), " => before transfer")
+
+        coordinatorPI = coordinatorKeypair;
+        coordinatorPIPubkey = coordinatorPubkey;
+        const [derivedSponsorPDA] = PublicKey.findProgramAddressSync(
+         [Buffer.from(SPONSOR_SEED), signer.publicKey.toBuffer(), Buffer.from(sponsor)],
+           program.programId
+         )
+
 
         const [coordinatorPDA] = anchor.web3.PublicKey.findProgramAddressSync(
          [
@@ -136,6 +199,64 @@ describe("escrow", () => {
               ).accounts({
                 signer: signer.publicKey,
         }).rpc();
+        
+        console.log(await connection.getBalance(escrowPDA), " => after transfer")
+        const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);
+        assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
+        assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
+    })
+  
+    it ("Prefund signer (PI)", async() => {
+        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance before transfer")
+
+        await program.methods.prefundSignerAsPi(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: coordinatorPIPubkey,
+            sponsorAuthority: signer.publicKey
+        }).signers([coordinatorPI]).rpc()
+
+        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance After transfer")
+    })
+  
+    it ("init coordinator with PI", async() => {
+        const coordinatorKeypair = anchor.web3.Keypair.generate();
+        const coordinatorPubkey = coordinatorKeypair.publicKey;
+        console.log(await connection.getBalance(escrowPDA), " => before transfer")
+
+        const [derivedSponsorPDA] = PublicKey.findProgramAddressSync(
+         [Buffer.from(SPONSOR_SEED), signer.publicKey.toBuffer(), Buffer.from(sponsor)],
+           program.programId
+         )
+
+        const [coordinatorPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+         [
+            Buffer.from(COORDINATOR_SEED),
+            trialPDA.toBuffer(),
+            coordinatorPubkey.toBuffer(),
+         ],
+         program.programId
+        );
+
+ //     const sig = await connection.requestAirdrop(
+ //      coordinatorPIPubkey,
+ //      5 * anchor.web3.LAMPORTS_PER_SOL
+ //     );
+ 
+ //     await connection.confirmTransaction(sig);
+
+
+        await program.methods
+            .initCoordinatorWithPi(
+              trialId,
+              sponsor,
+              coordinatorPubkey,
+              {crc:{}},
+            ).accounts({
+              signer: coordinatorPIPubkey,
+              sponsorAuthority: sponsorAccount.authority
+        }).signers([coordinatorPI]).rpc();
         
         console.log(await connection.getBalance(escrowPDA), " => after transfer")
         const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);

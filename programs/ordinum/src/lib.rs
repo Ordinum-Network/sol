@@ -6,7 +6,7 @@ pub mod errors;
 pub mod constants;
 
 use instructions::*;
-use crate::states::enums::{CoordinatorRole, CoordinatorStatus};
+use crate::states::enums::{CoordinatorRole};
 
 declare_id!("HEsXA7uhHXTTJkKNBR8Ydj4h4hmRxcX4eksVb4uMJceT");
 
@@ -33,5 +33,16 @@ pub mod ordinum {
 
     pub fn init_coordinator(ctx: Context<InitCoordinator>, trial_id: String, sponsor_title: String, coordinator_pubkey: Pubkey, role: CoordinatorRole) -> Result<()> {
         instructions::create_coordinator(ctx, trial_id, sponsor_title, coordinator_pubkey, role)
+    }
+    
+    pub fn init_coordinator_with_pi(ctx: Context<InitCoordinatorWithPI>, trial_id: String, sponsor_title: String, coordinator_pubkey: Pubkey, role: CoordinatorRole) -> Result<()> {
+        instructions::create_coordinator_with_pi(ctx, trial_id, sponsor_title, coordinator_pubkey, role)
+    }
+
+    pub fn prefund_signer_as_sponsor(ctx: Context<PrefundSignerAsSponsor>, trial_id: String, sponsor_title: String) -> Result<()> {
+      instructions::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info())    }
+    
+    pub fn prefund_signer_as_pi(ctx: Context<PrefundSignerAsPI>, trial_id: String, sponsor_title: String) -> Result<()> {
+      instructions::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info())
     }
 }
