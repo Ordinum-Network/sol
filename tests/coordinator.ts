@@ -362,28 +362,28 @@ describe("coordinator", () => {
      
      it ("init coordinator with CRC", async() => {
         try {
-        const coordinatorKeypair = anchor.web3.Keypair.generate();
-        const coordinatorPubkey = coordinatorKeypair.publicKey;
-        console.log(await connection.getBalance(escrowPDA), " => before transfer")
-        const sig = await connection.requestAirdrop(
-          coordinatorPIPubkey,
-           2 * anchor.web3.LAMPORTS_PER_SOL
-        );
- 
-        await connection.confirmTransaction(sig);
-
-        await program.methods
-            .initCoordinatorWithPi(
-              trialId,
-              sponsor,
+          const coordinatorKeypair = anchor.web3.Keypair.generate();
+          const coordinatorPubkey = coordinatorKeypair.publicKey;
+          console.log(await connection.getBalance(escrowPDA), " => before transfer")
+          const sig = await connection.requestAirdrop(
+            coordinatorPIPubkey,
+             2 * anchor.web3.LAMPORTS_PER_SOL
+          );
+   
+          await connection.confirmTransaction(sig);
+  
+          await program.methods
+              .initCoordinatorWithPi(
+                trialId,
+                sponsor,
               coordinatorPubkey,
               {cra:{}},
             ).accounts({
               signer: coordinatorPIPubkey,
               sponsorAuthority: sponsorAccount.authority
-        }).signers([coordinatorPI]).rpc();
-         assert.fail("Expected error but succeeded");
-      } catch(err: any) {
+         }).signers([coordinatorPI]).rpc();
+          assert.fail("Expected error but succeeded");
+       } catch(err: any) {
           const isUnauthorized = err.message.includes("Unauthorized");
           const isInsufficientFunds = err.message.includes("insufficient lamports");
           assert.ok(isUnauthorized || isInsufficientFunds);
