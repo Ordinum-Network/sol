@@ -45,4 +45,8 @@ pub mod ordinum {
     pub fn prefund_signer_as_pi(ctx: Context<PrefundSignerAsPI>, trial_id: String, sponsor_title: String) -> Result<()> {
       instructions::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info())
     }
+
+    pub fn init_patient(ctx: Context<CreatePatient>, trial_id: String, sponsor_title: String, consent_hash: [u8;32]) -> Result<()> {
+      instructions::init_patient(ctx, trial_id, sponsor_title, consent_hash)
+    }
 }
