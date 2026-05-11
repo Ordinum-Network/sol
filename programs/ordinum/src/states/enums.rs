@@ -17,3 +17,8 @@ pub enum CoordinatorRole {
 pub enum CoordinatorStatus {
     Active, Inactive
 }
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
+pub enum PatientStatus {
+    Active, Completed, Withdrawn
+}

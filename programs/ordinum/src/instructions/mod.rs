@@ -9,3 +9,6 @@ pub use escrow::*;
 
 pub mod coordinator;
 pub use coordinator::*;
+
+pub mod patient;
+pub use patient::*;

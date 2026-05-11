@@ -10,16 +10,13 @@ pub fn create_coordinator(
     coordinator_pubkey: Pubkey,
     role: CoordinatorRole,
 ) -> Result<()> {
-  let rent = Rent::get()?;
-  let coordinator_rent = rent.minimum_balance(Coordinator::SIZE);
+  // let rent = Rent::get()?;
+  // let coordinator_rent = rent.minimum_balance(Coordinator::SIZE);
 
-  let escrow_account = &ctx.accounts.escrow_account;
+  // let escrow_account = &ctx.accounts.escrow_account;
   let trial_account = &ctx.accounts.trial_account;
 
-  require!(
-    escrow_account.get_lamports() > coordinator_rent,
-    OrdinumError::InsufficientFunds,
-  );
+
   let sponsor_key = ctx.accounts.sponsor_account.key();
   
   //reimbursing signer from escrow ----
@@ -46,26 +43,20 @@ pub fn create_coordinator_with_pi(
   coordinator_pubkey: Pubkey,
   role: CoordinatorRole,
 ) -> Result<()>{
-  let rent = Rent::get()?;
-  let coordinator_rent = rent.minimum_balance(Coordinator::SIZE);
+  // let rent = Rent::get()?;
+  // let coordinator_rent = rent.minimum_balance(Coordinator::SIZE);
 
   let escrow_account = &ctx.accounts.escrow_account;
   let trial_account = &ctx.accounts.trial_account;
   let pi = &ctx.accounts.coordinator;
-
-
-  require!(
-    escrow_account.get_lamports() > coordinator_rent,
-    OrdinumError::InsufficientFunds
-  );
 
   require!(
     pi.role == CoordinatorRole::PI,
     OrdinumError::Unauthorized,
   );
 
-  **ctx.accounts.escrow_account.to_account_info().try_borrow_mut_lamports()? -= coordinator_rent;
-  **ctx.accounts.signer.to_account_info().try_borrow_mut_lamports()? +=coordinator_rent;
+  // **ctx.accounts.escrow_account.to_account_info().try_borrow_mut_lamports()? -= coordinator_rent;
+  // **ctx.accounts.signer.to_account_info().try_borrow_mut_lamports()? +=coordinator_rent;
 
   ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
   let sponsor_key = ctx.accounts.sponsor_account.key();
@@ -169,6 +160,11 @@ pub struct InitCoordinatorWithPI<'info> {
 pub fn prefund_signer<'info>(escrow_info: AccountInfo<'info>, escrow: &mut Escrow, signer_info: AccountInfo<'info>) -> Result<()> {
     let rent = Rent::get()?;
     let amount = rent.minimum_balance(Coordinator::SIZE);
+    
+    require!(
+     escrow_info.get_lamports() > amount,
+     OrdinumError::InsufficientFunds
+  );
     **escrow_info.try_borrow_mut_lamports()? -= amount;
     **signer_info.try_borrow_mut_lamports()? += amount;
     escrow.sol_balance = escrow_info.get_lamports();

@@ -15,8 +15,8 @@ pub struct Coordinator {
 impl Coordinator {
    pub const SIZE: usize =
      8
-     + 32  //trialId
-     + 32  //sponsor
+     + 32  // trialId
+     + 32  // sponsor
      + 1   // role
      + 1   // status
      + 8   // assignedAt
