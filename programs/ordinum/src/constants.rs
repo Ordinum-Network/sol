@@ -6,4 +6,4 @@ pub const ESCROW_SEED:&[u8] = b"escrow";
 pub const COORDINATOR_SEED:&[u8] = b"coordinator";
 pub const PATIENT_SEED:&[u8] = b"patient";
 
-pub const USDC_MINT: Pubkey = pubkey!("HHfrY3bF21eY9V72DB5EMz4sdtcJnN8BCfeu2cgY9YgM");
+pub const USDC_MINT: Pubkey = pubkey!("AwxLAYqp7qu9iBQc3jpqcbu6NFGaEm3xnKyPVAgz8hLC");

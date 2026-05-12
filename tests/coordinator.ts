@@ -209,7 +209,7 @@ describe("coordinator", () => {
     })
   
     it ("Prefund signer (PI)", async() => {
-        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance before transfer")
+        console.log(await connection.getBalance(coordinatorPIPubkey), "PI Balance before transfer")
 
         await program.methods.prefundSignerAsPi(
             trialId,
@@ -219,7 +219,7 @@ describe("coordinator", () => {
             sponsorAuthority: signer.publicKey
         }).signers([coordinatorPI]).rpc()
 
-        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance After transfer")
+        console.log(await connection.getBalance(coordinatorPIPubkey), "PI Balance After transfer")
     })
   
     it ("init coordinator with PI", async() => {
@@ -283,7 +283,6 @@ describe("coordinator", () => {
     it ("init coordinator (CRC)", async() => {
         const coordinatorKeypair = anchor.web3.Keypair.generate();
         const coordinatorPubkey = coordinatorKeypair.publicKey;
-        console.log(await connection.getBalance(escrowPDA), " => before transfer")
 
         coordinatorPI = coordinatorKeypair;
         coordinatorPIPubkey = coordinatorPubkey;
@@ -311,15 +310,14 @@ describe("coordinator", () => {
               ).accounts({
                 signer: signer.publicKey,
         }).rpc();
-        
-        console.log(await connection.getBalance(escrowPDA), " => after transfer")
+
         const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);
         assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
         assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
     })
 
     it ("Prefund signer (CRC)", async() => {
-        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance before transfer")
+        console.log(await connection.getBalance(coordinatorPIPubkey), "CRC Balance before transfer")
         try {
           await program.methods.prefundSignerAsPi(
               trialId,
@@ -333,7 +331,7 @@ describe("coordinator", () => {
           assert.ok(err.message.includes("Unauthorized"));
         }
 
-        console.log(await connection.getBalance(coordinatorPIPubkey), "Balance After transfer")
+        console.log(await connection.getBalance(coordinatorPIPubkey), "CRC Balance After transfer")
      })
 
      it ("init coordinator with CRC", async() => {
@@ -360,7 +358,7 @@ describe("coordinator", () => {
       }
      })
      
-     it ("init coordinator with CRC", async() => {
+     it ("init coordinator with CRC balanced", async() => {
         try {
           const coordinatorKeypair = anchor.web3.Keypair.generate();
           const coordinatorPubkey = coordinatorKeypair.publicKey;

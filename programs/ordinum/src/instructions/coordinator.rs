@@ -19,10 +19,6 @@ pub fn create_coordinator(
 
   let sponsor_key = ctx.accounts.sponsor_account.key();
   
-  //reimbursing signer from escrow ----
-  // **ctx.accounts.escrow_account.to_account_info().try_borrow_mut_lamports()? -= coordinator_rent;
-  // **ctx.accounts.signer.to_account_info().try_borrow_mut_lamports()? += coordinator_rent;
-
   //init coordinator acc as usual ---
   ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
   let coordinator = &mut ctx.accounts.coordinator_account;
@@ -155,87 +151,4 @@ pub struct InitCoordinatorWithPI<'info> {
   #[account(mut)]
   pub signer: Signer<'info>,
   pub system_program: Program<'info, System>,
-}
-
-pub fn prefund_signer<'info>(escrow_info: AccountInfo<'info>, escrow: &mut Escrow, signer_info: AccountInfo<'info>) -> Result<()> {
-    let rent = Rent::get()?;
-    let amount = rent.minimum_balance(Coordinator::SIZE);
-    
-    require!(
-     escrow_info.get_lamports() > amount,
-     OrdinumError::InsufficientFunds
-  );
-    **escrow_info.try_borrow_mut_lamports()? -= amount;
-    **signer_info.try_borrow_mut_lamports()? += amount;
-    escrow.sol_balance = escrow_info.get_lamports();
-    Ok(())
-}
-
-#[derive(Accounts)]
-#[instruction(trial_id: String, sponsor_title: String)]
-pub struct PrefundSignerAsSponsor<'info> {
-    pub sponsor_authority: SystemAccount<'info>,
-     
-    #[account(
-        seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-        bump,
-    )]
-    pub sponsor_account: Account<'info, Sponsor>,
-
-    #[account(
-      seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-      bump,
-    )]
-    pub trial_account: Account<'info, Trial>,
-  
-    #[account(
-        mut,
-        seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-        bump
-    )]
-    pub escrow_account: Account<'info, Escrow>,
-
-    /// CHECK: recipient to fund
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-#[instruction(trial_id: String, sponsor_title: String)]
-
-pub struct PrefundSignerAsPI<'info> {
-    pub sponsor_authority: SystemAccount<'info>,
-     
-    #[account(
-        seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-        bump,
-    )]
-    pub sponsor_account: Account<'info, Sponsor>,
-
-    #[account(
-      seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-      bump,
-    )]
-    pub trial_account: Account<'info, Trial>,
-  
-    #[account(
-        mut,
-        seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-        bump
-    )]
-    pub escrow_account: Account<'info, Escrow>,
-
-    #[account(
-       mut,
-        seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-        bump,
-        constraint = coordinator.role == CoordinatorRole::PI @ OrdinumError::Unauthorized,
-    )]
-    pub coordinator: Account<'info, Coordinator>,
-
-    /// CHECK: recipient to fund
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    pub system_program: Program<'info, System>,
 }

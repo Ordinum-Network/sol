@@ -4,8 +4,10 @@ pub mod instructions;
 pub mod states;
 pub mod errors;
 pub mod constants;
+pub mod common;
 
 use instructions::*;
+use common::*;
 use crate::states::enums::{CoordinatorRole};
 
 declare_id!("HEsXA7uhHXTTJkKNBR8Ydj4h4hmRxcX4eksVb4uMJceT");
@@ -16,6 +18,7 @@ pub mod ordinum {
     use crate::instructions::sponsor::InitSponsor;
     use crate::instructions::escrow::InitEscrow;
     use crate::instructions::trial::CreateTrial;
+use crate::states::AccountType;
 
     use super::*;
 
@@ -40,10 +43,14 @@ pub mod ordinum {
     }
 
     pub fn prefund_signer_as_sponsor(ctx: Context<PrefundSignerAsSponsor>, trial_id: String, sponsor_title: String) -> Result<()> {
-      instructions::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info())    }
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Coordinator)    
+    }
     
     pub fn prefund_signer_as_pi(ctx: Context<PrefundSignerAsPI>, trial_id: String, sponsor_title: String) -> Result<()> {
-      instructions::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info())
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Coordinator)
+    }
+    pub fn prefund_signer_as_crc(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Patient)
     }
 
     pub fn init_patient(ctx: Context<CreatePatient>, trial_id: String, sponsor_title: String, consent_hash: [u8;32]) -> Result<()> {

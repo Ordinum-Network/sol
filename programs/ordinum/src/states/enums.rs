@@ -22,3 +22,8 @@ pub enum CoordinatorStatus {
 pub enum PatientStatus {
     Active, Completed, Withdrawn
 }
+
+pub enum AccountType {
+    Patient,
+    Coordinator
+}
