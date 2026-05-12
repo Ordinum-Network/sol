@@ -14,3 +14,6 @@ pub mod patient;
 
 pub mod enums;
 pub use enums::*;
+
+pub mod visit_record;
+pub use visit_record::*;

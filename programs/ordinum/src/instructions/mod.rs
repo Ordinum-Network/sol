@@ -12,3 +12,6 @@ pub use coordinator::*;
 
 pub mod patient;
 pub use patient::*;
+
+pub mod visit_record;
+pub use visit_record::*;
