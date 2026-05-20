@@ -25,5 +25,6 @@ pub enum PatientStatus {
 
 pub enum AccountType {
     Patient,
-    Coordinator
+    Coordinator,
+    VisitRecord
 }

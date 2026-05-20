@@ -20,7 +20,7 @@ pub fn create_coordinator(
   let sponsor_key = ctx.accounts.sponsor_account.key();
   
   //init coordinator acc as usual ---
-  ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
+  // ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
   let coordinator = &mut ctx.accounts.coordinator_account;
   coordinator.trial_id = trial_account.key();
   coordinator.sponsor = sponsor_key;
@@ -42,7 +42,7 @@ pub fn create_coordinator_with_pi(
   // let rent = Rent::get()?;
   // let coordinator_rent = rent.minimum_balance(Coordinator::SIZE);
 
-  let escrow_account = &ctx.accounts.escrow_account;
+  // let escrow_account = &ctx.accounts.escrow_account;
   let trial_account = &ctx.accounts.trial_account;
   let pi = &ctx.accounts.coordinator;
 
@@ -54,7 +54,7 @@ pub fn create_coordinator_with_pi(
   // **ctx.accounts.escrow_account.to_account_info().try_borrow_mut_lamports()? -= coordinator_rent;
   // **ctx.accounts.signer.to_account_info().try_borrow_mut_lamports()? +=coordinator_rent;
 
-  ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
+  // ctx.accounts.escrow_account.sol_balance = ctx.accounts.escrow_account.get_lamports();
   let sponsor_key = ctx.accounts.sponsor_account.key();
   let coordinator = &mut ctx.accounts.coordinator_account;
 
@@ -71,12 +71,12 @@ pub fn create_coordinator_with_pi(
 #[derive(Accounts)]
 #[instruction(trial_id: String, sponsor_title: String, coordinator_pubkey: Pubkey)]
 pub struct InitCoordinator<'info> {
-  #[account(
-   mut,
-   seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-   bump
-  )]
-  pub escrow_account: Account<'info, Escrow>,
+  // #[account(
+  //  mut,
+  //  seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
+  //  bump
+  // )]
+  // pub escrow_account: Account<'info, Escrow>,
 
    #[account(
      seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
@@ -118,12 +118,12 @@ pub struct InitCoordinatorWithPI<'info> {
   )]
   pub sponsor_account: Account<'info, Sponsor>, 
 
-  #[account(
-    mut,
-    seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump
-  )]
-  pub escrow_account: Account<'info, Escrow>,
+  // #[account(
+  //   mut,
+  //   seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
+  //   bump
+  // )]
+  // pub escrow_account: Account<'info, Escrow>,
 
   #[account(
     seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],

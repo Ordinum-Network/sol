@@ -3,11 +3,11 @@ import { Ordinum } from "../target/types/ordinum";
 import { assert } from "chai";
 import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
-import { COORDINATOR_SEED, ESCROW_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR } from "./utils/constants";
+import { COORDINATOR_SEED, ESCROW_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR, VISIT_RECORD } from "./utils/constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
-describe("patient", () => {
+describe("visit record", () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
     const connection = provider.connection;
@@ -22,6 +22,8 @@ describe("patient", () => {
     let CRC: anchor.web3.Keypair
     let CRCPubkey: anchor.web3.PublicKey
     let sponsorAccount: any
+    let patientPubkey: anchor.web3.PublicKey
+    let patientPDA: anchor.web3.PublicKey
 
     it ("initialise sponsor acc", async () => {
         const result = (await getProgramPDA(signer, program, sponsor))!;
@@ -219,7 +221,7 @@ describe("patient", () => {
         assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
     })
 
-     it("prefund signer (sponsor)", async() => {
+    it("prefund signer (crc)", async() => {
         console.log(await connection.getBalance(CRCPubkey), "CRC Balance before transfer")
 
         await program.methods.prefundSignerAsCrc(
@@ -234,33 +236,88 @@ describe("patient", () => {
         console.log(await connection.getBalance(CRCPubkey), "CRC Balance after transfer")
     })
 
+  
     it ("init patient", async() => {
-        const contHash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes())
-        const patient = anchor.web3.Keypair.generate()
-        const patientPubkey = patient.publicKey;
+          const contHash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes())
+          const patient = anchor.web3.Keypair.generate()
+          const _patientPubkey = patient.publicKey;
+      
+          patientPubkey = _patientPubkey
+          await program.methods.initPatient(
+             trialId,
+             sponsor, 
+             contHash
+          ).accounts({
+             signer: CRCPubkey,
+             sponsorAuthority: sponsorAccount.authority, 
+             patientWallet: patientPubkey
+          }).signers([CRC]).rpc()
+  
+          const [patientpda] = anchor.web3.PublicKey.findProgramAddressSync(
+           [
+               Buffer.from(PATIENT_SEED),
+               trialPDA.toBuffer(),
+               patientPubkey.toBuffer()
+           ],
+           program.programId
+          );
+          patientPDA = patientpda
+  
+          const patientAcc = await program.account.patient.fetch(patientPDA);
+          assert.isTrue(patientAcc.wallet.equals(patientPubkey))
+          
+    })
 
-        await program.methods.initPatient(
-           trialId,
-           sponsor, 
-           contHash
+    it("prefund signer (crc)", async() => {
+        console.log(await connection.getBalance(CRCPubkey), "CRC Balance before transfer")
+
+        await program.methods.prefundSignerAsCrcForVisit(
+            trialId,
+            sponsor
         ).accounts({
-           signer: CRCPubkey,
-           sponsorAuthority: sponsorAccount.authority, 
-           patientWallet: patientPubkey
+            signer: CRCPubkey,
+            sponsorAuthority: signer.publicKey
+        }).signers([CRC]).rpc()
+        
+        
+        console.log(await connection.getBalance(CRCPubkey), "CRC Balance after transfer")
+    })
+
+    it ("init visit record", async() => {
+        const contHash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes());
+       
+  
+        const patientAcc = await program.account.patient.fetch(patientPDA);
+        // const count = patientAcc.numberOfVisits;
+
+        const acc = await program.methods.visitRecord(
+            trialId,
+            sponsor,
+            1,
+            contHash
+        ).accounts({
+            signer:CRCPubkey,
+            sponsorAuthority: sponsorAccount.authority,
+            patientWallet: patientPubkey
         }).signers([CRC]).rpc()
 
+        const updatedPatientAcc = await program.account.patient.fetch(patientPDA);
 
-        const [patientPDA] = anchor.web3.PublicKey.findProgramAddressSync([
-            Buffer.from(PATIENT_SEED),
-            trialPDA.toBuffer(),
-            patientPubkey.toBuffer()
-         ],
-          program.programId
+        const [visitRecordPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+            [
+                Buffer.from(VISIT_RECORD),
+                trialPDA.toBuffer(),
+                patientPDA.toBuffer(),
+                new BN(1).toArrayLike(Buffer, "le", 1),
+                new BN(patientAcc.numberOfVisits).toArrayLike(Buffer, "le", 8),
+            ],
+            program.programId
         )
-        const patientAcc = await program.account.patient.fetch(patientPDA)
+       assert(updatedPatientAcc.numberOfVisits.eq(patientAcc.numberOfVisits.addn(1)));
 
-        assert(patientAcc.numberOfVisits.eq(new BN(0)))
-
+       const visitRecordAcc = await program.account.visitRecord.fetch(visitRecordPDA)
+       assert.isTrue(visitRecordAcc.patient.equals(patientPDA))
+       assert.isTrue(visitRecordAcc.trial.equals(trialPDA))
     })
 
 })

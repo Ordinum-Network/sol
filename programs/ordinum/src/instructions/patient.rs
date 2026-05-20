@@ -24,7 +24,7 @@ pub fn init_patient(
     patient.enrolled_at = Clock::get()?.unix_timestamp;
     patient.bump = ctx.bumps.patient_account;
     patient.last_modified = Clock::get()?.unix_timestamp;
-
+    
     Ok(())
 }
 

@@ -52,8 +52,16 @@ use crate::states::AccountType;
     pub fn prefund_signer_as_crc(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
       common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Patient)
     }
+   
+    pub fn prefund_signer_as_crc_for_visit(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::VisitRecord)
+    }
 
     pub fn init_patient(ctx: Context<CreatePatient>, trial_id: String, sponsor_title: String, consent_hash: [u8;32]) -> Result<()> {
       instructions::init_patient(ctx, trial_id, sponsor_title, consent_hash)
+    }
+
+    pub fn visit_record(ctx: Context<CreateVisitRecord>, trial_id: String, sponsor_title: String, phase: u8, data_hash:[u8;32]) -> Result<()> {
+      instructions::create_visit_record(ctx, trial_id, sponsor_title, phase, data_hash)
     }
 }
