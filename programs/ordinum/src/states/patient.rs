@@ -11,7 +11,7 @@ pub struct Patient {
   pub status: PatientStatus,
   pub enrolled_at: i64,
   pub bump: u8,
-  pub number_of_visits: u64,
+  pub number_of_visits: u8,
   pub last_modified: i64
 }
 
@@ -25,7 +25,7 @@ impl Patient {
      + 1     // status
      + 8     // enrolled_at
      + 1     // bump
-     + 8     // numberofvisits
+     + 1     // numberofvisits
      + 8     // last_modified
      ;
 }

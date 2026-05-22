@@ -259,7 +259,7 @@ describe("patient", () => {
         )
         const patientAcc = await program.account.patient.fetch(patientPDA)
 
-        assert(patientAcc.numberOfVisits.eq(new BN(0)))
+        assert(patientAcc.numberOfVisits === 0)
 
     })
 

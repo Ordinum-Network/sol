@@ -6,7 +6,7 @@ pub struct VisitRecord {
    pub trial: Pubkey,
    pub coordinator: Pubkey,
    pub phase: u8,
-   pub visit_number: u64,
+   pub visit_number: u8,
    pub data_hash: [u8;32],
    pub timestamp: i64,
    pub bump: u8
@@ -19,7 +19,7 @@ impl VisitRecord {
       + 32    //trial
       + 32    //coordinator
       + 1     //phase
-      + 8     //visitnumber
+      + 1     //visitnumber
       + 32    //datahash
       + 8     //timestamp
       + 1;    //bump

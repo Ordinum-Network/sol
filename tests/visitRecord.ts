@@ -309,12 +309,12 @@ describe("visit record", () => {
                 trialPDA.toBuffer(),
                 patientPDA.toBuffer(),
                 new BN(1).toArrayLike(Buffer, "le", 1),
-                new BN(patientAcc.numberOfVisits).toArrayLike(Buffer, "le", 8),
+                new BN(patientAcc.numberOfVisits).toArrayLike(Buffer, "le", 1),
             ],
             program.programId
         )
-       assert(updatedPatientAcc.numberOfVisits.eq(patientAcc.numberOfVisits.addn(1)));
-
+       assert(updatedPatientAcc.numberOfVisits === patientAcc.numberOfVisits + 1);
+       
        const visitRecordAcc = await program.account.visitRecord.fetch(visitRecordPDA)
        assert.isTrue(visitRecordAcc.patient.equals(patientPDA))
        assert.isTrue(visitRecordAcc.trial.equals(trialPDA))
