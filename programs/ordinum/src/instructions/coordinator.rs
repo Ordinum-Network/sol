@@ -118,13 +118,6 @@ pub struct InitCoordinatorWithPI<'info> {
   )]
   pub sponsor_account: Account<'info, Sponsor>, 
 
-  // #[account(
-  //   mut,
-  //   seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-  //   bump
-  // )]
-  // pub escrow_account: Account<'info, Escrow>,
-
   #[account(
     seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
     bump,

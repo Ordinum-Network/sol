@@ -6,5 +6,6 @@ pub const ESCROW_SEED:&[u8] = b"escrow";
 pub const COORDINATOR_SEED:&[u8] = b"coordinator";
 pub const PATIENT_SEED:&[u8] = b"patient";
 pub const VISIT_RECORD:&[u8] = b"visit_record";
+pub const PHASE:&[u8] = b"phase";
 
 pub const USDC_MINT: Pubkey = pubkey!("HmdG86YxmDKGh4kjP7jTohPm4phVoVnUU4BvQBXmeUpU");
