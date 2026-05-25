@@ -55,7 +55,7 @@ pub struct CreatePhase<'info> {
     
     #[account(
       mut,
-      seeds=[COORDINATOR_SEED, trial_account.key().as_ref()],
+      seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
       bump,
       constraint = coordinator_account.role == CoordinatorRole::CRC @ OrdinumError::Unauthorized,
     )]

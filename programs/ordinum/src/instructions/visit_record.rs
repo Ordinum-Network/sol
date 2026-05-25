@@ -9,7 +9,7 @@ pub fn create_visit_record(
     phase: u8,
     data_hash: [u8;32],  
 ) -> Result<()> {
-   let coordinator = &ctx.accounts.coordinator_account;   
+   let coordinator: &Account<'_, Coordinator> = &ctx.accounts.coordinator_account;   
    require!(
     coordinator.role == CoordinatorRole::CRC,
     OrdinumError::Unauthorized
