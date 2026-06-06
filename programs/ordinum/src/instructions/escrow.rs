@@ -31,6 +31,8 @@ pub fn init_escrow(
   let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
   transfer(cpi_ctx, initial_deposit)?;
+
+  //transferring minimum sol ------
   let transfer_ix = anchor_lang::solana_program::system_instruction::transfer(
     &ctx.accounts.signer.key(),
     &escrow_acc.key(),

@@ -27,5 +27,7 @@ pub enum AccountType {
     Patient,
     Coordinator,
     VisitRecord,
-    Phase
+    Phase,
+    Payment,
+    ATA
 }

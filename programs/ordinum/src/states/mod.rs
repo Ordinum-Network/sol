@@ -20,3 +20,6 @@ pub use visit_record::*;
 
 pub mod phase;
 pub use phase::*;
+
+pub mod payment;
+pub use payment::*;

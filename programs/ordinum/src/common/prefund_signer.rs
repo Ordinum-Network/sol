@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::{COORDINATOR_SEED, ESCROW_SEED, SPONSOR_SEED, TRIAL_SEED}, errors::OrdinumError, states::{AccountType, Coordinator, CoordinatorRole, Escrow, Phase, Sponsor, Trial, VisitRecord, patient::Patient}};
+use crate::{constants::{COORDINATOR_SEED, ESCROW_SEED, SPONSOR_SEED, TRIAL_SEED}, errors::OrdinumError, states::{AccountType, Coordinator, CoordinatorRole, Escrow, Payment, Phase, Sponsor, Trial, VisitRecord, patient::Patient}};
 
 #[derive(Accounts)]
 #[instruction(trial_id: String, sponsor_title: String)]
@@ -124,6 +124,12 @@ pub fn prefund_signer<'info>(escrow_info: AccountInfo<'info>, escrow: &mut Escro
       }
       AccountType::Phase => {
         amount = rent.minimum_balance(Phase::SIZE);
+      }
+      AccountType::Payment => {
+        amount = rent.minimum_balance(Payment::SIZE);
+      }
+      AccountType::ATA => {
+        amount = 2039280;
       }
     }
     

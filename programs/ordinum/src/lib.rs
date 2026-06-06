@@ -60,6 +60,14 @@ use crate::states::AccountType;
     pub fn prefund_signer_as_crc_for_phase(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
       common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Phase)
     }
+   
+    pub fn prefund_signer_as_crc_for_payment(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::Payment)
+    }
+
+    pub fn prefund_signer_as_crc_for_ATA(ctx: Context<PrefundSignerAsCRC>, trial_id: String, sponsor_title: String) -> Result<()> {
+      common::prefund_signer(ctx.accounts.escrow_account.to_account_info(), &mut ctx.accounts.escrow_account, ctx.accounts.signer.to_account_info(), AccountType::ATA)
+    }
 
     pub fn init_patient(ctx: Context<CreatePatient>, trial_id: String, sponsor_title: String, consent_hash: [u8;32]) -> Result<()> {
       instructions::init_patient(ctx, trial_id, sponsor_title, consent_hash)
@@ -71,6 +79,10 @@ use crate::states::AccountType;
 
     pub fn init_phase(ctx: Context<CreatePhase>, trial_id: String, sponsor_title: String, data_hash:[u8;32], total_visits: u16) -> Result<()> {
       instructions::create_phase(ctx, trial_id, sponsor_title, data_hash, total_visits)
+    }
+
+    pub fn init_paymentacc(ctx: Context<CreatePayment>, trial_id: String, sponsor_title: String, phase: u8, amount: u64) -> Result<()> {
+      instructions::create_payment(ctx, trial_id, sponsor_title, phase, amount)
     }
 
 }
