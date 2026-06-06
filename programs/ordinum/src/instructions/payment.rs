@@ -26,29 +26,29 @@ pub fn create_payment(
     payment_acc.bump = ctx.bumps.payment_acc;
 
     //initiate_transfer ----
- let escrow_bump = ctx.accounts.escrow_account.bump;
-let escrow_seeds = &[
-    ESCROW_SEED,
-    trial_id.as_bytes(),
-    sponsor_key.as_ref(),
-    &[escrow_bump],
-];
-let signer_seeds = &[&escrow_seeds[..]];
-
-let cpi_accounts = Transfer {
-    from: ctx.accounts.escrow_token_account.to_account_info(),
-    to: ctx.accounts.reciever_token_account.to_account_info(),
-    authority: ctx.accounts.escrow_account.to_account_info(), // escrow PDA, not sponsor
-};
-
-let cpi_ctx = CpiContext::new_with_signer(
-    ctx.accounts.token_program.to_account_info(),
-    cpi_accounts,
-    signer_seeds,
-);
-
-transfer(cpi_ctx, amount)?;
-
+    let escrow_bump = ctx.accounts.escrow_account.bump;
+    let escrow_seeds = &[
+        ESCROW_SEED,
+        trial_id.as_bytes(),
+        sponsor_key.as_ref(),
+        &[escrow_bump],
+    ];
+    let signer_seeds = &[&escrow_seeds[..]];
+    
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.escrow_token_account.to_account_info(),
+        to: ctx.accounts.reciever_token_account.to_account_info(),
+        authority: ctx.accounts.escrow_account.to_account_info(), 
+    };
+    
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+        signer_seeds,
+    );
+    
+    transfer(cpi_ctx, amount)?;
+    
     Ok(())
 }
 
