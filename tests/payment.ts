@@ -26,6 +26,7 @@ describe("payment", () => {
     let patientPubkey: anchor.web3.PublicKey
     let patientPDA: anchor.web3.PublicKey
     let visitRecordPDA: anchor.web3.PublicKey
+    let phasePDA: anchor.web3.PublicKey
     let phaseAcc: any;
 
     it ("initialise sponsor acc", async () => {
@@ -240,28 +241,30 @@ describe("payment", () => {
         console.log(await connection.getBalance(CRCPubkey), "CRC Balance after transfer")
     })
 
-       it("init phase", async() => {
-           const hash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes())
-           await program.methods.initPhase(
-            trialId,
-            sponsor, 
-            hash,
-            19
-           ).accounts({
-            signer: CRCPubkey,
-            sponsorAuthority: sponsorAccount.authority
-           }).signers([CRC]).rpc()
-    
-           const [phasePDA] = anchor.web3.PublicKey.findProgramAddressSync([
-              Buffer.from(PHASE),
-              trialPDA.toBuffer(), 
-              new BN(trialAcc.currentPhase).toArrayLike(Buffer, "le", 1),
-           ], program.programId)
-    
-           phaseAcc = await program.account.phase.fetch(phasePDA)
-           assert.isTrue(phaseAcc.trialId.equals(trialPDA))
-           assert.isTrue(phaseAcc.sponsor.equals(sponsorPDA))
-        })
+    it("init phase", async() => {
+        const hash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes())
+        await program.methods.initPhase(
+         trialId,
+         sponsor, 
+         hash,
+         19
+        ).accounts({
+         signer: CRCPubkey,
+         sponsorAuthority: sponsorAccount.authority
+        }).signers([CRC]).rpc()
+
+        const [phasePda] = anchor.web3.PublicKey.findProgramAddressSync([
+           Buffer.from(PHASE),
+           trialPDA.toBuffer(), 
+           new BN(trialAcc.currentPhase).toArrayLike(Buffer, "le", 1),
+        ], program.programId)
+
+        phasePDA = phasePda
+        phaseAcc = await program.account.phase.fetch(phasePDA)
+        assert.isTrue(phaseAcc.trialId.equals(trialPDA))
+        assert.isTrue(phaseAcc.sponsor.equals(sponsorPDA))
+        assert.ok(new BN(phaseAcc.phaseNumber).eq(new BN(1)))
+    })
     
 
 
@@ -358,9 +361,10 @@ describe("payment", () => {
        assert(updatedPatientAcc.numberOfVisits === patientAcc.numberOfVisits + 1);
        visitRecordPDA = visitRecordPda
        const visitRecordAcc = await program.account.visitRecord.fetch(visitRecordPDA)
-       VISIT_RECORD 
+
        assert.isTrue(visitRecordAcc.patient.equals(patientPDA))
        assert.isTrue(visitRecordAcc.trial.equals(trialPDA))
+       assert.ok(new BN(visitRecordAcc.phase).eq(new BN(1)))
     })
 
     it("prefund signer (crc)", async() => {
@@ -396,14 +400,38 @@ describe("payment", () => {
         await program.methods.initPaymentacc(
            trialId,
            sponsor,
-           0, 
+           1, 
            new BN(10)
         ).accounts({
             signer: CRCPubkey, 
             sponsorAuthority: sponsorAccount.authority,
             recieverWallet: patientPubkey,
             visitRecord: visitRecordPDA,
+            phaseAccount: phasePDA
         }).signers([CRC]).rpc()
+
+        const pubkey = new PublicKey(USDC_ADDR)
+        const ata = await getAssociatedTokenAddress(
+            pubkey,
+            patientPubkey,
+            true
+        )
+
+        const [paymentPDA] = anchor.web3.PublicKey.findProgramAddressSync([
+          Buffer.from("payment"),
+          trialPDA.toBuffer(),
+          new BN(1).toArrayLike(Buffer, "le", 1),
+          visitRecordPDA.toBuffer(),
+          patientPDA.toBuffer()
+        ], program.programId)
+       
+         const paymentAcc = await program.account.payment.fetch(paymentPDA)
+
+        const balance = await connection.getTokenAccountBalance(ata);
+        
+        assert.ok(new BN(balance.value.amount).eq(new BN(10)))
+        assert.isTrue(paymentAcc.trialId.equals(trialPDA))
+        assert.ok(new BN(paymentAcc.phase).eq(new BN(1)))
     })
 
 })

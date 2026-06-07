@@ -90,7 +90,7 @@ pub struct CreatePayment<'info> {
     pub patient_account: Box<Account<'info, Patient>>,
 
     #[account(
-     seeds=[PHASE, trial_account.key().as_ref(), &phase.to_le_bytes()],
+     seeds=[PHASE, trial_account.key().as_ref(), &(phase-1).to_le_bytes()],
      bump
     )]
     pub phase_account: Box<Account<'info, Phase>>,
