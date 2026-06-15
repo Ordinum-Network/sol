@@ -9,4 +9,4 @@ pub const VISIT_RECORD:&[u8] = b"visit_record";
 pub const PHASE:&[u8] = b"phase";
 pub const PAYMENT:&[u8] = b"payment";
 
-pub const USDC_MINT: Pubkey = pubkey!("EiCu7zLANK8r4LNzewYJbCPvFkU8RLzfmWU5ByjBQC4J");
+pub const USDC_MINT: Pubkey = pubkey!("9QanPo9KoEzxiYgZ4PeQXLesu5y2oVUt6C2frBLEm9Ry");

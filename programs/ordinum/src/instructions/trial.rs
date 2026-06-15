@@ -54,3 +54,24 @@ pub struct CreateTrial<'info> {
    pub signer: Signer<'info>,
    pub system_program: Program<'info, System>,
 }
+
+#[derive(Accounts)]
+#[instruction(trial_id: String, sponsor_title: String)]
+
+pub struct UpdateTrial<'info> {
+  #[account(
+    mut,
+    has_one=authority,
+    seeds=[SPONSOR_SEED, authority.key().as_ref(), sponsor_title.as_bytes()],
+    bump=sponsor_account.bump
+  )]
+  pub sponsor_account: Account<'info, Sponsor>,
+  
+  #[account(
+    
+  )]
+  pub trial_account: Account<'info, Trial>,
+
+  pub authority: Signer<'info>
+}
+

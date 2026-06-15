@@ -1,0 +1,4 @@
+{
+    "editor.fontFamily": "'Cascadia Code', Monaco, 'Courier New', monospace",
+    "files.autoSave": "onFocusChange"
+}

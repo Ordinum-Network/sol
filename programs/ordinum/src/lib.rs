@@ -14,7 +14,8 @@ declare_id!("HEsXA7uhHXTTJkKNBR8Ydj4h4hmRxcX4eksVb4uMJceT");
 
 #[program]
 pub mod ordinum {
-    use crate::instructions::coordinator::InitCoordinator;
+    use crate::instruction::UpdateSponsorVerified;
+use crate::instructions::coordinator::InitCoordinator;
     use crate::instructions::sponsor::InitSponsor;
     use crate::instructions::escrow::InitEscrow;
     use crate::instructions::trial::CreateTrial;
@@ -83,6 +84,10 @@ use crate::states::AccountType;
 
     pub fn init_paymentacc(ctx: Context<CreatePayment>, trial_id: String, sponsor_title: String, phase: u8, amount: u64) -> Result<()> {
       instructions::create_payment(ctx, trial_id, sponsor_title, phase, amount)
+    }
+
+    pub fn update_sponsor_verified(ctx: Context<UpdateSponsor>, sponsor_title: String, verified: bool) -> Result<()> {
+      instructions::update_sponsor_verified(ctx, sponsor_title, verified)
     }
 
 }
