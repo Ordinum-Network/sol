@@ -13,6 +13,7 @@ describe("trial", () => {
     const signer = provider.wallet;
     const sponsor: string = "pFizer"
     let sponsorPDA: any
+    let trialId: string;
     
     
     it ("initialise sponsor acc in trial", async () => {
@@ -33,6 +34,7 @@ describe("trial", () => {
             startDate: new BN(now),
             endDate: new BN(now + 30 * 24 * 60 * 60) 
         }
+        trialId = trial.trialId
 
         const [trialPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
           [
@@ -59,6 +61,56 @@ describe("trial", () => {
         const trialAccount = await program.account.trial.fetch(trialPDA);
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
         assert.equal(trialAccount.title, trial.trialId);
+    })
+
+    it ("update total phases in trial", async() => {
+      
+      await program.methods.updateTotalPhasesInTrial(
+        24,
+        sponsor,
+        trialId
+      ).accounts({
+        signer: signer.publicKey
+      }).rpc()
+
+       const [trialPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(TRIAL_SEED),
+            signer.publicKey.toBuffer(),
+            Buffer.from(trialId),
+            sponsorPDA.toBuffer()
+          ],
+          program.programId
+        )
+
+        const trialAcc = await program.account.trial.fetch(trialPDA)
+
+        assert.ok(new BN(trialAcc.totalPhases).eq(new BN(24)))
+    })
+   
+    it ("update status in trial", async() => {
+      
+      await program.methods.updateStatusInTrial(
+        TrialStatus.InProgress,
+        sponsor,
+        trialId,
+      ).accounts({
+        signer: signer.publicKey
+      }).rpc()
+
+       const [trialPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(TRIAL_SEED),
+            signer.publicKey.toBuffer(),
+            Buffer.from(trialId),
+            sponsorPDA.toBuffer()
+          ],
+          program.programId
+        )
+
+        const trialAcc = await program.account.trial.fetch(trialPDA)
+
+        assert.ok(new BN(trialAcc.totalPhases).eq(new BN(24)))
     })
 })
 

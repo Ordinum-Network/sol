@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
-use crate::states::{Sponsor};
 use crate::constants::*;
+use crate::states::Sponsor;
+use anchor_lang::prelude::*;
 
 pub fn initialise_sponsor(ctx: Context<InitSponsor>, sponsor_title: String) -> Result<()> {
     let sponsor = &mut ctx.accounts.sponsor_account;
@@ -12,41 +12,43 @@ pub fn initialise_sponsor(ctx: Context<InitSponsor>, sponsor_title: String) -> R
     Ok(())
 }
 
-pub fn update_sponsor_verified(ctx: Context<UpdateSponsor>, sponsor_title: String, verified: bool) -> Result<()> {
+pub fn update_sponsor_verified(
+    ctx: Context<UpdateSponsor>,
+    sponsor_title: String,
+    verified: bool,
+) -> Result<()> {
     let sponsor = &mut ctx.accounts.sponsor_acc;
     sponsor.verified = verified;
     Ok(())
 }
 
-// pub fn update_sponsor_trialcount(ctx: Context<UpdateSponsor>, sponsor_title: String, trialCount:)
-
 #[derive(Accounts)]
 #[instruction(sponsor_title: String)]
-pub struct InitSponsor<'info> { 
-  #[account(
+pub struct InitSponsor<'info> {
+    #[account(
     init, 
     space=Sponsor::SIZE, 
     payer=signer, 
     seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()], 
     bump
   )]
-  pub sponsor_account: Account<'info, Sponsor>,
-  
-  #[account(mut)]  
-  pub signer: Signer<'info>, 
-  pub system_program: Program<'info, System>
+    pub sponsor_account: Account<'info, Sponsor>,
+
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 #[instruction(sponsor_title: String)]
 pub struct UpdateSponsor<'info> {
-  #[account(
+    #[account(
     mut,
     has_one=authority,
-    seeds=[SPONSOR_SEED, authority.key().as_ref()],
+    seeds=[SPONSOR_SEED, authority.key().as_ref(), sponsor_title.as_bytes()],
     bump=sponsor_acc.bump
   )]
-  pub sponsor_acc: Account<'info, Sponsor>,
+    pub sponsor_acc: Account<'info, Sponsor>,
 
-  pub authority: Signer<'info>
+    pub authority: Signer<'info>,
 }

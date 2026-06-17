@@ -16,5 +16,4 @@ pub enum OrdinumError {
 
     #[msg("Insufficient Funds")]
     InsufficientFunds,
-    
 }

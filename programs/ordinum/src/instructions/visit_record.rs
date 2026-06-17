@@ -1,34 +1,38 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::{COORDINATOR_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, VISIT_RECORD}, errors::OrdinumError, instructions::{coordinator, trial, visit_record}, states::{Coordinator, CoordinatorRole, Sponsor, Trial, VisitRecord, patient::Patient}};
+use crate::{
+    constants::{COORDINATOR_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, VISIT_RECORD},
+    errors::OrdinumError,
+    instructions::{coordinator, trial, visit_record},
+    states::{patient::Patient, Coordinator, CoordinatorRole, Sponsor, Trial, VisitRecord},
+};
 
 pub fn create_visit_record(
     ctx: Context<CreateVisitRecord>,
     trial_id: String,
-    sponsor_title: String,     
+    sponsor_title: String,
     phase: u8,
-    data_hash: [u8;32],  
+    data_hash: [u8; 32],
 ) -> Result<()> {
-   let coordinator: &Account<'_, Coordinator> = &ctx.accounts.coordinator_account;   
-   require!(
-    coordinator.role == CoordinatorRole::CRC,
-    OrdinumError::Unauthorized
-   );
-   let visit_record = &mut ctx.accounts.visit_record_account;
-   let patient = &mut ctx.accounts.patient_account;
-   
-   visit_record.patient = patient.key();
-   visit_record.trial = ctx.accounts.trial_account.key();
-   visit_record.coordinator = coordinator.key();
-   visit_record.phase = phase;
-   visit_record.visit_number = patient.number_of_visits+1;
-   visit_record.data_hash = data_hash;
-   visit_record.timestamp = Clock::get()?.unix_timestamp;
-   visit_record.bump = ctx.bumps.visit_record_account;
-   
+    let coordinator: &Account<'_, Coordinator> = &ctx.accounts.coordinator_account;
+    require!(
+        coordinator.role == CoordinatorRole::CRC,
+        OrdinumError::Unauthorized
+    );
+    let visit_record = &mut ctx.accounts.visit_record_account;
+    let patient = &mut ctx.accounts.patient_account;
 
-   patient.number_of_visits = patient.number_of_visits+1;
-   Ok(())
+    visit_record.patient = patient.key();
+    visit_record.trial = ctx.accounts.trial_account.key();
+    visit_record.coordinator = coordinator.key();
+    visit_record.phase = phase;
+    visit_record.visit_number = patient.number_of_visits + 1;
+    visit_record.data_hash = data_hash;
+    visit_record.timestamp = Clock::get()?.unix_timestamp;
+    visit_record.bump = ctx.bumps.visit_record_account;
+
+    patient.number_of_visits = patient.number_of_visits + 1;
+    Ok(())
 }
 
 #[derive(Accounts)]
@@ -37,7 +41,7 @@ pub fn create_visit_record(
 pub struct CreateVisitRecord<'info> {
     pub sponsor_authority: SystemAccount<'info>,
     pub patient_wallet: SystemAccount<'info>,
-    
+
     #[account(
         seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
         bump

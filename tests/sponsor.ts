@@ -53,4 +53,18 @@ describe("sponsor", () => {
         sponsorPDA = sponsorPda;
         assert.equal(sponsorAcc.authority.toBase58(), signer.publicKey.toBase58());
     })
+
+    it ("update verified", async () => {
+        await program.methods.updateSponsorVerified(
+          sponsor,
+          true
+        ).accounts({
+            signer: signer.publicKey
+        }).rpc()
+
+        const result = (await getProgramPDA(signer, program, sponsor))!;
+
+        const { sponsorAcc } = result!;
+        assert.equal(sponsorAcc.verified, true)
+    })
 })

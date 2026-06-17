@@ -5,7 +5,7 @@ pub struct Phase {
     pub trial_id: Pubkey,
     pub sponsor: Pubkey,
     pub phase_number: u8,
-    pub data_hash: [u8;32],
+    pub data_hash: [u8; 32],
     pub completed_by: Pubkey,
     pub total_visits: u16,
     pub completed_at: i64,
@@ -13,8 +13,7 @@ pub struct Phase {
 }
 
 impl Phase {
-    pub const SIZE: usize = 
-    8           // disc
+    pub const SIZE: usize = 8           // disc
     + 32        // trial_id
     + 32        // sponsor
     + 1         // phase
@@ -22,5 +21,5 @@ impl Phase {
     + 32        // completedby
     + 2         // totalvisits
     + 8         // completedat
-    + 1 ;       // bump
+    + 1; // bump
 }

@@ -1,12 +1,12 @@
-use anchor_lang::prelude::{Pubkey, pubkey};
+use anchor_lang::prelude::{pubkey, Pubkey};
 
-pub const SPONSOR_SEED:&[u8] = b"sponsor";
-pub const TRIAL_SEED:&[u8] = b"trial";
-pub const ESCROW_SEED:&[u8] = b"escrow";
-pub const COORDINATOR_SEED:&[u8] = b"coordinator";
-pub const PATIENT_SEED:&[u8] = b"patient";
-pub const VISIT_RECORD:&[u8] = b"visit_record";
-pub const PHASE:&[u8] = b"phase";
-pub const PAYMENT:&[u8] = b"payment";
+pub const SPONSOR_SEED: &[u8] = b"sponsor";
+pub const TRIAL_SEED: &[u8] = b"trial";
+pub const ESCROW_SEED: &[u8] = b"escrow";
+pub const COORDINATOR_SEED: &[u8] = b"coordinator";
+pub const PATIENT_SEED: &[u8] = b"patient";
+pub const VISIT_RECORD: &[u8] = b"visit_record";
+pub const PHASE: &[u8] = b"phase";
+pub const PAYMENT: &[u8] = b"payment";
 
 pub const USDC_MINT: Pubkey = pubkey!("9QanPo9KoEzxiYgZ4PeQXLesu5y2oVUt6C2frBLEm9Ry");

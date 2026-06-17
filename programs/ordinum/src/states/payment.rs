@@ -11,7 +11,7 @@ pub struct Payment {
     pub reciever_wallet: Pubkey,
     pub timestamp: i64,
     pub amount: u64,
-    pub bump: u8
+    pub bump: u8,
 }
 
 impl Payment {

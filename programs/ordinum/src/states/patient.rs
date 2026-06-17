@@ -4,15 +4,15 @@ use crate::states::PatientStatus;
 
 #[account]
 pub struct Patient {
-  pub trial_id: Pubkey,
-  pub sponsor: Pubkey,
-  pub wallet: Pubkey,
-  pub consent_hash: [u8;32],
-  pub status: PatientStatus,
-  pub enrolled_at: i64,
-  pub bump: u8,
-  pub number_of_visits: u8,
-  pub last_modified: i64
+    pub trial_id: Pubkey,
+    pub sponsor: Pubkey,
+    pub wallet: Pubkey,
+    pub consent_hash: [u8; 32],
+    pub status: PatientStatus,
+    pub enrolled_at: i64,
+    pub bump: u8,
+    pub number_of_visits: u8,
+    pub last_modified: i64,
 }
 
 impl Patient {

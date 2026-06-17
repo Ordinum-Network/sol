@@ -2,25 +2,30 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
 pub enum TrialStatus {
-    Draft, 
+    Draft,
     Active,
-    Paused, 
+    Paused,
     Completed,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
 pub enum CoordinatorRole {
-    PI, CRC, CRA
+    PI,
+    CRC,
+    CRA,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
 pub enum CoordinatorStatus {
-    Active, Inactive
+    Active,
+    Inactive,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
 pub enum PatientStatus {
-    Active, Completed, Withdrawn
+    Active,
+    Completed,
+    Withdrawn,
 }
 
 pub enum AccountType {
@@ -29,5 +34,5 @@ pub enum AccountType {
     VisitRecord,
     Phase,
     Payment,
-    ATA
+    ATA,
 }
