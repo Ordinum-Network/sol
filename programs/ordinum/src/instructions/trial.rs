@@ -31,7 +31,7 @@ pub fn create_trial(
     Ok(())
 }
 
-pub fn udpate_total_phases(ctx: Context<UpdateTrial>, total_phases: u8, sponsor_title: String, trial_id: String) -> Result<()> {
+pub fn udpate_total_phases(ctx: Context<UpdateTrial>, trial_id: String, sponsor_title: String, total_phases: u8) -> Result<()> {
     let trial_account = &mut ctx.accounts.trial_account;
 
     trial_account.total_phases = total_phases;
@@ -39,7 +39,7 @@ pub fn udpate_total_phases(ctx: Context<UpdateTrial>, total_phases: u8, sponsor_
     Ok(())
 }
 
-pub fn update_status(ctx: Context<UpdateTrial>, status:TrialStatus, sponsor_title: String, trial_id: String) -> Result<()>{
+pub fn update_status(ctx: Context<UpdateTrial>, trial_id: String, sponsor_title: String, status:TrialStatus,) -> Result<()>{
   let trial_account = &mut ctx.accounts.trial_account;
   
   trial_account.status = status;
@@ -70,7 +70,7 @@ pub struct CreateTrial<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(trial_id: String, sponsor_title: String)]
+#[instruction(sponsor_title: String, trial_id: String)]
 pub struct UpdateTrial<'info> {
     #[account(
     has_one=authority,

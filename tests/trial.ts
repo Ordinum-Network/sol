@@ -66,9 +66,9 @@ describe("trial", () => {
     it ("update total phases in trial", async() => {
       
       await program.methods.updateTotalPhasesInTrial(
-        24,
         sponsor,
-        trialId
+        trialId,
+        24
       ).accounts({
         signer: signer.publicKey
       }).rpc()
@@ -91,9 +91,9 @@ describe("trial", () => {
     it ("update status in trial", async() => {
       
       await program.methods.updateStatusInTrial(
-        TrialStatus.InProgress,
         sponsor,
         trialId,
+        {active: {}}
       ).accounts({
         signer: signer.publicKey
       }).rpc()
@@ -110,7 +110,9 @@ describe("trial", () => {
 
         const trialAcc = await program.account.trial.fetch(trialPDA)
 
-        assert.ok(new BN(trialAcc.totalPhases).eq(new BN(24)))
+        assert.deepEqual(trialAcc.status, {
+          active: {},
+        });
     })
 })
 

@@ -221,11 +221,11 @@ pub mod ordinum {
 
     pub fn update_total_phases_in_trial(
         ctx: Context<UpdateTrial>,
-        total_phases: u8,
         sponsor_title: String, 
-        trial_id: String
+        trial_id: String,
+        total_phases: u8,
     ) -> Result<()> {
-        instructions::udpate_total_phases(ctx, total_phases, sponsor_title, trial_id)
+        instructions::udpate_total_phases(ctx, trial_id, sponsor_title, total_phases)
     }
 
     pub fn update_status_in_trial(
@@ -234,6 +234,6 @@ pub mod ordinum {
         trial_id: String,
         status: TrialStatus
     ) -> Result<()> {
-        instructions::update_status(ctx, status, sponsor_title, trial_id)
+        instructions::update_status(ctx, trial_id, sponsor_title, status)
     }
 }
