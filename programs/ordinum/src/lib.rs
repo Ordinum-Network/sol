@@ -236,4 +236,14 @@ pub mod ordinum {
     ) -> Result<()> {
         instructions::update_status(ctx, trial_id, sponsor_title, status)
     }
+
+    pub fn update_completed_by_in_phase(
+        ctx: Context<UpdatePhase>,
+        trial_id: String,
+        sponsor_title: String,
+        phase: u8,
+        completed_at: i64
+    ) -> Result<()> {
+        instructions::update_completed_at(ctx, trial_id, sponsor_title, phase, completed_at)
+    }
 }

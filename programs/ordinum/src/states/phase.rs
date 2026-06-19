@@ -6,9 +6,9 @@ pub struct Phase {
     pub sponsor: Pubkey,
     pub phase_number: u8,
     pub data_hash: [u8; 32],
-    pub completed_by: Pubkey,
-    pub total_visits: u16,
-    pub completed_at: i64,
+    pub completed_by: Pubkey, //editable
+    pub total_visits: u16, //editable
+    pub completed_at: i64, //editable
     pub bump: u8,
 }
 

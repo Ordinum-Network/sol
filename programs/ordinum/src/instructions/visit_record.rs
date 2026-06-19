@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{COORDINATOR_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, VISIT_RECORD},
+    constants::{COORDINATOR_SEED, PATIENT_SEED, PHASE, SPONSOR_SEED, TRIAL_SEED, VISIT_RECORD},
     errors::OrdinumError,
-    instructions::{coordinator, trial, visit_record},
-    states::{patient::Patient, Coordinator, CoordinatorRole, Sponsor, Trial, VisitRecord},
+    instructions::{coordinator, phase, trial, visit_record},
+    states::{Coordinator, CoordinatorRole, Phase, Sponsor, Trial, VisitRecord, patient::Patient},
 };
 
 pub fn create_visit_record(
@@ -21,6 +21,7 @@ pub fn create_visit_record(
     );
     let visit_record = &mut ctx.accounts.visit_record_account;
     let patient = &mut ctx.accounts.patient_account;
+    let phase_account = &mut ctx.accounts.phase_account;
 
     visit_record.patient = patient.key();
     visit_record.trial = ctx.accounts.trial_account.key();
@@ -32,6 +33,8 @@ pub fn create_visit_record(
     visit_record.bump = ctx.bumps.visit_record_account;
 
     patient.number_of_visits = patient.number_of_visits + 1;
+    phase_account.total_visits = phase_account.total_visits + 1;
+
     Ok(())
 }
 
@@ -68,6 +71,13 @@ pub struct CreateVisitRecord<'info> {
        bump
     )]
     pub patient_account: Account<'info, Patient>,
+
+    #[account(
+        mut,
+        seeds=[PHASE, trial_account.key().as_ref(), &(phase-1).to_le_bytes()],
+        bump
+    )]
+    pub phase_account: Account<'info, Phase>,
 
     #[account(
         init,

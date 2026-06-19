@@ -24,6 +24,7 @@ describe("phase", () => {
     let sponsorAccount: any
     let patientPubkey: anchor.web3.PublicKey
     let patientPDA: anchor.web3.PublicKey
+    let phasePDA: anchor.web3.PublicKey
     let trialAcc: any;
 
     it ("initialise sponsor acc", async () => {
@@ -248,15 +249,37 @@ describe("phase", () => {
         sponsorAuthority: sponsorAccount.authority
        }).signers([CRC]).rpc()
 
-       const [phasePDA] = anchor.web3.PublicKey.findProgramAddressSync([
+       const [phasePda] = anchor.web3.PublicKey.findProgramAddressSync([
           Buffer.from(PHASE),
           trialPDA.toBuffer(), 
           new BN(trialAcc.currentPhase).toArrayLike(Buffer, "le", 1),
        ], program.programId)
+       phasePDA = phasePda
 
        const phaseAcc = await program.account.phase.fetch(phasePDA)
        assert.isTrue(phaseAcc.trialId.equals(trialPDA))
        assert.isTrue(phaseAcc.sponsor.equals(sponsorPDA))
+    })
+
+    it("update completed at", async() => {
+       const completedAt = new anchor.BN(
+        Math.floor(Date.now() / 1000)
+       ); 
+       
+       await program.methods.updateCompletedByInPhase(
+         trialId,
+         sponsor,
+         1,
+         completedAt
+       ).accounts({
+          signer: CRCPubkey,
+          sponsorAuthority: sponsorAccount.authority,
+          phaseAccount: phasePDA
+       }).signers([CRC]).rpc()
+       
+       const phaseAcc = await program.account.phase.fetch(phasePDA)
+       assert.ok(new BN(phaseAcc.completedAt).eq(new BN(completedAt)))
+       assert.isTrue(phaseAcc.completedBy.equals(CRCPubkey))
     })
 
 

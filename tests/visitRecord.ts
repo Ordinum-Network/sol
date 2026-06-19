@@ -3,7 +3,7 @@ import { Ordinum } from "../target/types/ordinum";
 import { assert } from "chai";
 import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
-import { COORDINATOR_SEED, ESCROW_SEED, PATIENT_SEED, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR, VISIT_RECORD } from "./utils/constants";
+import { COORDINATOR_SEED, ESCROW_SEED, PATIENT_SEED, PHASE, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR, VISIT_RECORD } from "./utils/constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
@@ -24,6 +24,8 @@ describe("visit record", () => {
     let sponsorAccount: any
     let patientPubkey: anchor.web3.PublicKey
     let patientPDA: anchor.web3.PublicKey
+    let phasePda: anchor.web3.PublicKey
+    let trialAcc: any
 
     it ("initialise sponsor acc", async () => {
         const result = (await getProgramPDA(signer, program, sponsor))!;
@@ -69,7 +71,7 @@ describe("visit record", () => {
         
         trialId = trial.trialId
         const trialAccount = await program.account.trial.fetch(trialPDA);
-
+trialAcc = trialAccount;
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
         assert.equal(trialAccount.title, trial.trialId);
     }) 
@@ -283,6 +285,44 @@ describe("visit record", () => {
         console.log(await connection.getBalance(CRCPubkey), "CRC Balance after transfer")
     })
 
+        it("prefund signer (crc)", async() => {
+        console.log(await connection.getBalance(CRCPubkey), "CRC Balance before transfer")
+
+        await program.methods.prefundSignerAsCrcForPhase(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: CRCPubkey,
+            sponsorAuthority: signer.publicKey
+        }).signers([CRC]).rpc()
+        console.log(await connection.getBalance(CRCPubkey), "CRC Balance After transfer")
+    })
+
+        it("init phase", async() => {
+           const hash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes())
+           await program.methods.initPhase(
+            trialId,
+            sponsor, 
+            hash,
+            19
+           ).accounts({
+            signer: CRCPubkey,
+            sponsorAuthority: sponsorAccount.authority
+           }).signers([CRC]).rpc()
+    
+           const [phasePDA] = anchor.web3.PublicKey.findProgramAddressSync([
+              Buffer.from(PHASE),
+              trialPDA.toBuffer(), 
+              new BN(trialAcc.currentPhase).toArrayLike(Buffer, "le", 1),
+           ], program.programId)
+
+           phasePda = phasePDA
+    
+           const phaseAcc = await program.account.phase.fetch(phasePDA)
+           assert.isTrue(phaseAcc.trialId.equals(trialPDA))
+           assert.isTrue(phaseAcc.sponsor.equals(sponsorPDA))
+        })
+
     it ("init visit record", async() => {
         const contHash = Array.from(anchor.web3.Keypair.generate().publicKey.toBytes());
        
@@ -298,7 +338,8 @@ describe("visit record", () => {
         ).accounts({
             signer:CRCPubkey,
             sponsorAuthority: sponsorAccount.authority,
-            patientWallet: patientPubkey
+            patientWallet: patientPubkey,
+            phaseAccount: phasePda
         }).signers([CRC]).rpc()
 
         const updatedPatientAcc = await program.account.patient.fetch(patientPDA);

@@ -74,3 +74,51 @@ pub struct CreatePhase<'info> {
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
+
+pub fn update_completed_at(ctx: Context<UpdatePhase>, trial_id: String, sponsor_title: String, phase: u8, completed_at: i64) -> Result<()> {
+    let phase = &mut ctx.accounts.phase_account;
+    
+    //need further instructions -----
+
+    phase.completed_at = completed_at;
+    phase.completed_by = ctx.accounts.signer.key();
+    Ok(())
+}
+
+#[derive(Accounts)]
+#[instruction(trial_id: String, sponsor_title: String, phase: u8)]
+pub struct UpdatePhase<'info> {
+    pub sponsor_authority: SystemAccount<'info>,
+
+    #[account(
+      seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
+      bump
+    )]
+    pub sponsor_account: Account<'info, Sponsor>,
+
+    #[account(
+      mut,
+      seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
+      bump
+    )]
+    pub trial_account: Account<'info, Trial>,
+
+    #[account(
+      seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
+      bump,
+      constraint = coordinator_account.role == CoordinatorRole::CRC @ OrdinumError::Unauthorized,
+    )]
+    pub coordinator_account: Account<'info, Coordinator>,
+
+    #[account(
+      mut,
+      seeds=[PHASE, trial_account.key().as_ref(), &(phase-1).to_le_bytes()],
+      bump
+    )]
+    pub phase_account: Account<'info, Phase>,
+
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+

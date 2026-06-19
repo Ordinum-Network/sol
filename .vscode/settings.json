@@ -1,4 +1,16 @@
 {
     "editor.fontFamily": "'JetBrains Mono', Monaco, 'Courier New', monospace",
-    "files.autoSave": "onFocusChange"
+    "files.autoSave": "onFocusChange",
+    "github.copilot.chat.newWorkspaceCreation.enabled": false,
+    "github.copilot.chat.cloudAgent.enabled": false,
+    "github.copilot.chat.backgroundAgent.enabled": false,
+    "chat.agent.enabled": false,
+    "github.copilot.chat.reviewAgent.enabled": false,
+    "github.copilot.chat.claudeAgent.enabled": false,
+    "github.copilot.chat.exploreAgent.enabled": false,
+    "github.copilot.chat.organizationCustomAgents.enabled": false,
+    "github.copilot.chat.agent.currentEditorContext.enabled": false,
+    "github.copilot.chat.summarizeAgentConversationHistory.enabled": false,
+    "chat.titleBar.openInAgentsWindow.enabled": false,
+    "workbench.browser.enableChatTools": false
 }

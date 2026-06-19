@@ -343,7 +343,8 @@ describe("payment", () => {
         ).accounts({
             signer:CRCPubkey,
             sponsorAuthority: sponsorAccount.authority,
-            patientWallet: patientPubkey
+            patientWallet: patientPubkey,
+            phaseAccount: phasePDA
         }).signers([CRC]).rpc()
 
         const updatedPatientAcc = await program.account.patient.fetch(patientPDA);
