@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::spl_associated_token_account::solana_program::native_token::LAMPORTS_PER_SOL;
 
 use crate::{
     constants::{COORDINATOR_SEED, ESCROW_SEED, SPONSOR_SEED, TRIAL_SEED},
@@ -122,7 +123,8 @@ pub fn prefund_signer<'info>(
     accountType: AccountType,
 ) -> Result<()> {
     let rent = Rent::get()?;
-    let mut amount: u64;
+    let mut amount: u64 = 0;
+    let mut transact = true;
     match accountType {
         AccountType::Coordinator => {
             amount = rent.minimum_balance(Coordinator::SIZE);
@@ -142,14 +144,27 @@ pub fn prefund_signer<'info>(
         AccountType::ATA => {
             amount = 2039280;
         }
+        AccountType::Update => {
+            let payer_balance = signer_info.to_account_info().get_lamports();
+            let min_balance = LAMPORTS_PER_SOL/100;
+            if (payer_balance > min_balance) {
+              transact = false;
+            } else if (payer_balance < min_balance) {
+              amount = min_balance - payer_balance
+            }
+        }
     }
 
     require!(
         escrow_info.get_lamports() > amount,
         OrdinumError::InsufficientFunds
     );
-    **escrow_info.try_borrow_mut_lamports()? -= amount;
-    **signer_info.try_borrow_mut_lamports()? += amount;
-    escrow.sol_balance = escrow_info.get_lamports();
+    
+    if (transact && amount != 0) {
+      **escrow_info.try_borrow_mut_lamports()? -= amount;
+      **signer_info.try_borrow_mut_lamports()? += amount;
+      escrow.sol_balance = escrow_info.get_lamports();
+    } 
+
     Ok(())
 }

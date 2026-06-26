@@ -35,4 +35,5 @@ pub enum AccountType {
     Phase,
     Payment,
     ATA,
+    Update
 }

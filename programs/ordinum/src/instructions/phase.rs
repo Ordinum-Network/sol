@@ -1,11 +1,8 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{accounts::signer, prelude::*};
+use anchor_spl::associated_token::spl_associated_token_account::solana_program::native_token::LAMPORTS_PER_SOL;
 
 use crate::{
-    constants::{COORDINATOR_SEED, PHASE, SPONSOR_SEED, TRIAL_SEED},
-    errors::OrdinumError,
-    instructions::sponsor,
-    program::Ordinum,
-    states::{Coordinator, CoordinatorRole, Phase, Sponsor, Trial},
+   constants::{COORDINATOR_SEED, ESCROW_SEED, PHASE, SPONSOR_SEED, TRIAL_SEED}, errors::OrdinumError, instructions::{escrow, sponsor}, program::Ordinum, states::{Coordinator, CoordinatorRole, Escrow, Phase, Sponsor, Trial}
 };
 
 pub fn create_phase(
@@ -26,7 +23,7 @@ pub fn create_phase(
     phase.sponsor = ctx.accounts.sponsor_account.key();
     phase.phase_number = trial.current_phase + 1;
     phase.data_hash = data_hash;
-    phase.completed_by = ctx.accounts.coordinator_account.key();
+    // phase.completed_by = ctx.accounts.coordinator_account.key();
     phase.total_visits = total_visits;
     phase.completed_at = 0;
     phase.bump = ctx.bumps.phase;
@@ -77,8 +74,6 @@ pub struct CreatePhase<'info> {
 
 pub fn update_completed_at(ctx: Context<UpdatePhase>, trial_id: String, sponsor_title: String, phase: u8, completed_at: i64) -> Result<()> {
     let phase = &mut ctx.accounts.phase_account;
-    
-    //need further instructions -----
 
     phase.completed_at = completed_at;
     phase.completed_by = ctx.accounts.signer.key();
@@ -97,7 +92,6 @@ pub struct UpdatePhase<'info> {
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
-      mut,
       seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
       bump
     )]

@@ -5,7 +5,7 @@ import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
 import { COORDINATOR_SEED, ESCROW_SEED, PATIENT_SEED, PHASE, SPONSOR_SEED, TRIAL_SEED, USDC_ADDR, VISIT_RECORD } from "./utils/constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 describe("phase", () => {
     const provider = anchor.AnchorProvider.env();
@@ -234,7 +234,6 @@ describe("phase", () => {
             signer: CRCPubkey,
             sponsorAuthority: signer.publicKey
         }).signers([CRC]).rpc()
-        console.log(await connection.getBalance(CRCPubkey), "CRC Balance After transfer")
     })
 
     it("init phase", async() => {
@@ -257,16 +256,35 @@ describe("phase", () => {
        phasePDA = phasePda
 
        const phaseAcc = await program.account.phase.fetch(phasePDA)
+       assert.ok(new BN(phaseAcc.completedAt).eq(new BN(0)))
        assert.isTrue(phaseAcc.trialId.equals(trialPDA))
        assert.isTrue(phaseAcc.sponsor.equals(sponsorPDA))
+    })
+
+    it("prefund signer for update", async() => {
+        console.log(await connection.getBalance(CRCPubkey), "rrrrrrr11111111")
+        await program.methods.prefundSignerForUpdate(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: CRCPubkey,
+            sponsorAuthority: signer.publicKey
+        }).signers([CRC]).rpc()
+         console.log(await connection.getBalance(CRCPubkey), "rrrrrrr22222222")
     })
 
     it("update completed at", async() => {
        const completedAt = new anchor.BN(
         Math.floor(Date.now() / 1000)
-       ); 
-       
-       await program.methods.updateCompletedByInPhase(
+       );
+    //    await connection.confirmTransaction(
+    //     await connection.requestAirdrop(
+    //         CRCPubkey,
+    //         0.01*LAMPORTS_PER_SOL
+    //     )
+    //    )
+
+       const tx = await program.methods.updateCompletedByInPhase(
          trialId,
          sponsor,
          1,
@@ -275,12 +293,20 @@ describe("phase", () => {
           signer: CRCPubkey,
           sponsorAuthority: sponsorAccount.authority,
           phaseAccount: phasePDA
-       }).signers([CRC]).rpc()
+       }).transaction()
+
+       tx.feePayer = CRCPubkey
+       const sig = await anchor.web3.sendAndConfirmTransaction(
+         connection,
+         tx, 
+         [CRC]
+       )
+
+       console.log("tx:", sig)
        
        const phaseAcc = await program.account.phase.fetch(phasePDA)
        assert.ok(new BN(phaseAcc.completedAt).eq(new BN(completedAt)))
        assert.isTrue(phaseAcc.completedBy.equals(CRCPubkey))
     })
-
 
 })

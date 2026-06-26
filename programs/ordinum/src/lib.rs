@@ -171,6 +171,18 @@ pub mod ordinum {
             AccountType::ATA,
         )
     }
+    pub fn prefund_signer_for_update(
+        ctx: Context<PrefundSignerAsCRC>,
+        trial_id: String,
+        sponsor_title: String,
+    ) -> Result<()> {
+        common::prefund_signer(
+            ctx.accounts.escrow_account.to_account_info(),
+            &mut ctx.accounts.escrow_account,
+            ctx.accounts.signer.to_account_info(),
+            AccountType::Update,
+        )
+    }
 
     pub fn init_patient(
         ctx: Context<CreatePatient>,
@@ -237,8 +249,10 @@ pub mod ordinum {
         instructions::update_status(ctx, trial_id, sponsor_title, status)
     }
 
+    
+
     pub fn update_completed_by_in_phase(
-        ctx: Context<UpdatePhase>,
+        mut ctx: Context<UpdatePhase>,
         trial_id: String,
         sponsor_title: String,
         phase: u8,
