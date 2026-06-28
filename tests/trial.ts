@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Ordinum } from "../target/types/ordinum";
-import { TRIAL_SEED } from "./utils/constants";
+import { ESCROW_SEED, TRIAL_SEED } from "./utils/constants";
 import { assert } from "chai";
 import { BN } from "bn.js";
 import { getProgramPDA } from "./helpers/getSponsor";
@@ -14,7 +14,8 @@ describe("trial", () => {
     const sponsor: string = "pFizer"
     let sponsorPDA: any
     let trialId: string;
-    
+    let trialPDA: anchor.web3.PublicKey;
+    let escrowPDA: anchor.web3.PublicKey;
     
     it ("initialise sponsor acc in trial", async () => {
        const result = (await getProgramPDA(signer, program, sponsor))!;
@@ -36,7 +37,7 @@ describe("trial", () => {
         }
         trialId = trial.trialId
 
-        const [trialPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+        const [trialPda, bump] = anchor.web3.PublicKey.findProgramAddressSync(
           [
             Buffer.from(TRIAL_SEED),
             signer.publicKey.toBuffer(),
@@ -45,6 +46,7 @@ describe("trial", () => {
           ],
           program.programId
         )
+        trialPDA = trialPda
 
         await program.methods
               .initTrial(
@@ -61,6 +63,44 @@ describe("trial", () => {
         const trialAccount = await program.account.trial.fetch(trialPDA);
         assert.isTrue(trialAccount.sponsor.equals(sponsorPDA));
         assert.equal(trialAccount.title, trial.trialId);
+    })
+
+    it ("init escrow account with ATA", async() => {
+             const [escrowPda, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+                 [
+                     Buffer.from(ESCROW_SEED),
+                     Buffer.from(trialId),
+                     sponsorPDA.toBuffer()
+                 ],
+                 program.programId
+             )
+             escrowPDA = escrowPda
+     
+     
+             await program.methods
+                   .initEscrow(
+                      trialId,
+                      sponsor,
+                      new BN(100),
+                      new BN(100 * anchor.web3.LAMPORTS_PER_SOL)
+                   )
+                   .accounts({
+                     signer: signer.publicKey,
+                   }).rpc()
+            
+             const escrowAcc = await program.account.escrow.fetch(escrowPDA);
+             assert.isTrue(escrowAcc.trial.equals(trialPDA));      
+                   
+      })
+
+    it("prefund signer for update", async() => {
+      await program.methods.prefundSignerForUpdate(
+          trialId,
+          sponsor
+      ).accounts({
+          signer: signer.publicKey,
+          sponsorAuthority: signer.publicKey
+      }).rpc()
     })
 
     it ("update total phases in trial", async() => {
@@ -86,6 +126,16 @@ describe("trial", () => {
         const trialAcc = await program.account.trial.fetch(trialPDA)
 
         assert.ok(new BN(trialAcc.totalPhases).eq(new BN(24)))
+    })
+
+    it("prefund signer for update", async() => {
+        await program.methods.prefundSignerForUpdate(
+            trialId,
+            sponsor
+        ).accounts({
+            signer: signer.publicKey,
+            sponsorAuthority: signer.publicKey
+        }).rpc()
     })
    
     it ("update status in trial", async() => {

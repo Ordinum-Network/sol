@@ -5,4 +5,4 @@ export const COORDINATOR_SEED = "coordinator";
 export const PATIENT_SEED = "patient";
 export const VISIT_RECORD = "visit_record";
 export const PHASE = "phase";
-export const USDC_ADDR = "Du3pMP1EUB9NJRgYJv7UY651qNNyAg5sQAtxkGcMGV95";
+export const USDC_ADDR = "6DMm8x6Z1qonkBqeD6FQue3a3m9hFWky5EoUxGka3GKJ";

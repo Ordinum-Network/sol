@@ -172,7 +172,7 @@ pub mod ordinum {
         )
     }
     pub fn prefund_signer_for_update(
-        ctx: Context<PrefundSignerAsCRC>,
+        ctx: Context<PrefundSignerAsSponsor>,
         trial_id: String,
         sponsor_title: String,
     ) -> Result<()> {
