@@ -19,6 +19,7 @@ describe("coordinator", () => {
     let trialPDA: anchor.web3.PublicKey
     let trialId: string
     let escrowPDA: anchor.web3.PublicKey
+    let coPDA: anchor.web3.PublicKey
     let coordinatorPI: anchor.web3.Keypair
     let coordinatorPIPubkey: anchor.web3.PublicKey
     let crcPubkey: anchor.web3.PublicKey
@@ -226,7 +227,7 @@ describe("coordinator", () => {
         const coordinatorKeypair = anchor.web3.Keypair.generate();
         const coordinatorPubkey = coordinatorKeypair.publicKey;
         console.log(await connection.getBalance(escrowPDA), " => before transfer")
-
+        crcPubkey = coordinatorPubkey
         const [derivedSponsorPDA] = PublicKey.findProgramAddressSync(
          [Buffer.from(SPONSOR_SEED), signer.publicKey.toBuffer(), Buffer.from(sponsor)],
            program.programId
@@ -240,7 +241,7 @@ describe("coordinator", () => {
          ],
          program.programId
         );
-
+        coPDA = coordinatorPDA
  //     const sig = await connection.requestAirdrop(
  //      coordinatorPIPubkey,
  //      5 * anchor.web3.LAMPORTS_PER_SOL
@@ -254,6 +255,7 @@ describe("coordinator", () => {
               trialId,
               sponsor,
               coordinatorPubkey,
+              "",
               {crc:{}},
             ).accounts({
               signer: coordinatorPIPubkey,
@@ -310,7 +312,6 @@ describe("coordinator", () => {
               ).accounts({
                 signer: signer.publicKey,
         }).rpc();
-
         const coordinatorAcc = await program.account.coordinator.fetch(coordinatorPDA);
         assert.isTrue(coordinatorAcc.sponsor.equals(sponsorPDA));
         assert.isTrue(coordinatorAcc.trialId.equals(trialPDA));
@@ -345,6 +346,7 @@ describe("coordinator", () => {
               trialId,
               sponsor,
               coordinatorPubkey,
+              "",
               {cra:{}},
             ).accounts({
               signer: coordinatorPIPubkey,
@@ -374,8 +376,9 @@ describe("coordinator", () => {
               .initCoordinatorWithPi(
                 trialId,
                 sponsor,
-              coordinatorPubkey,
-              {cra:{}},
+                coordinatorPubkey,
+                "",
+                {cra:{}},
             ).accounts({
               signer: coordinatorPIPubkey,
               sponsorAuthority: sponsorAccount.authority
@@ -386,6 +389,43 @@ describe("coordinator", () => {
           const isInsufficientFunds = err.message.includes("insufficient lamports");
           assert.ok(isUnauthorized || isInsufficientFunds);
       }
+     })
+
+     it("prefund signer to update PI", async() => {
+        await program.methods.prefundSignerForUpdate(
+            trialId, 
+            sponsor
+        ).accounts({
+            signer: coordinatorPIPubkey,
+            sponsorAuthority: signer.publicKey
+        }).signers([coordinatorPI]).rpc();
+
+     })
+
+     it("update coordinator to inactive", async() => {
+         const tx = await program.methods.updateCoordinatorInactive(
+            trialId,
+            sponsor,
+            crcPubkey
+         ).accounts({
+            signer: coordinatorPIPubkey,
+            sponsorAuthority: sponsorAccount.authority
+         }).transaction()
+
+         tx.feePayer = coordinatorPIPubkey
+         const sig = await anchor.web3.sendAndConfirmTransaction(
+            connection,
+            tx, 
+            [coordinatorPI]
+         )
+         console.log("tx: ", sig)
+
+         const coAccount = await program.account.coordinator.fetch(coPDA)
+
+         assert.deepEqual(coAccount.status, {
+            inactive: {}
+         })
+
      })
 
 })

@@ -13,6 +13,7 @@ pub enum CoordinatorRole {
     PI,
     CRC,
     CRA,
+    OTH
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]

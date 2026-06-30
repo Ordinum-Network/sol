@@ -71,6 +71,7 @@ pub mod ordinum {
         trial_id: String,
         sponsor_title: String,
         coordinator_pubkey: Pubkey,
+        title: String,
         role: CoordinatorRole,
     ) -> Result<()> {
         instructions::create_coordinator_with_pi(
@@ -78,6 +79,7 @@ pub mod ordinum {
             trial_id,
             sponsor_title,
             coordinator_pubkey,
+            title,
             role,
         )
     }
@@ -265,5 +267,9 @@ pub mod ordinum {
 
     pub fn top_up_tokens(ctx: Context<UpdateEscrow>, trial_id: String, sponsor_title: String, usdc: u64) -> Result<()> {
         instructions::top_up_tokens(ctx, trial_id, sponsor_title, usdc)
+    }
+
+    pub fn update_coordinator_inactive(ctx: Context<UpdateCoordinator>, trial_id: String, sponsor_title: String, coordinator_pubkey: Pubkey) -> Result<()> {
+        instructions::update_coordinator_status_inactive(ctx, trial_id, sponsor_title, coordinator_pubkey)
     }
 }
