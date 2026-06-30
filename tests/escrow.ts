@@ -5,7 +5,7 @@ import { getProgramPDA } from "./helpers/getSponsor";
 import { BN } from "bn.js";
 import { ESCROW_SEED, TRIAL_SEED, USDC_ADDR } from "./utils/constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 describe("escrow", () => {
     const provider = anchor.AnchorProvider.env();
@@ -106,10 +106,38 @@ describe("escrow", () => {
         const balance = await connection.getTokenAccountBalance(ata);
         assert.ok(new BN(balance.value.amount).eq(new BN(100)))
     })
-   
-    it ("fetch PDA's sol balance", async() => {
-        const expected = new BN(100).mul(new BN(anchor.web3.LAMPORTS_PER_SOL));
-        assert.ok(new BN(100*anchor.web3.LAMPORTS_PER_SOL).gte(expected));
+
+    it ("top up sol", async() => {
+        console.log(await connection.getBalance(escrowPDA), "eeeeeeeeeeerrrrrrrrrrr2222222")
+        await program.methods.topUpSol(
+           trialId,
+           sponsor,
+           new BN(100 * anchor.web3.LAMPORTS_PER_SOL) 
+        ).accounts({
+            signer: signer.publicKey
+        }).rpc()
+        console.log(await connection.getBalance(escrowPDA), "eeeeeeeeeeeerrrrrrrrrrrr1111")
+    })
+
+    it("top up tokens", async() => {
+
+        const pubkey = new PublicKey(USDC_ADDR)
+        const ata = await getAssociatedTokenAddress(
+            pubkey,
+            escrowPDA,
+            true
+        )
+
+        await program.methods.topUpTokens(
+            trialId, 
+            sponsor,
+            new BN(100)
+        ).accounts({
+            signer: signer.publicKey
+        }).rpc();
+        
+        const balance = await connection.getTokenAccountBalance(ata);
+        assert.ok(new BN(balance.value.amount).eq(new BN(200)))  
     })
 
 })

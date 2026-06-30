@@ -249,8 +249,6 @@ pub mod ordinum {
         instructions::update_status(ctx, trial_id, sponsor_title, status)
     }
 
-    
-
     pub fn update_completed_by_in_phase(
         mut ctx: Context<UpdatePhase>,
         trial_id: String,
@@ -259,5 +257,13 @@ pub mod ordinum {
         completed_at: i64
     ) -> Result<()> {
         instructions::update_completed_at(ctx, trial_id, sponsor_title, phase, completed_at)
+    }
+
+    pub fn top_up_sol(ctx: Context<UpdateEscrow>, trial_id: String, sponsor_title: String, sol: u64) -> Result<()> {
+        instructions::top_up_sol(ctx, trial_id, sponsor_title, sol)
+    }
+
+    pub fn top_up_tokens(ctx: Context<UpdateEscrow>, trial_id: String, sponsor_title: String, usdc: u64) -> Result<()> {
+        instructions::top_up_tokens(ctx, trial_id, sponsor_title, usdc)
     }
 }
