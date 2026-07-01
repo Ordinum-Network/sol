@@ -425,7 +425,6 @@ describe("coordinator", () => {
          assert.deepEqual(coAccount.status, {
             inactive: {}
          })
-
      })
 
 })
