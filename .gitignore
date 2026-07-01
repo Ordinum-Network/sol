@@ -1,7 +1,42 @@
-.anchor
-.DS_Store
-target
+# Anchor build
+target/
+dist/
+test-ledger/
+.coverage/
+
+# Solana keypairs
+*.json
+!package.json
+!tsconfig.json
+!jsconfig.json
+
+# Rust
 **/*.rs.bk
-node_modules
-test-ledger
-.yarn
+
+# Cargo
+Cargo.lock
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+
+# Generated artifacts
+**/*.so
+**/*.d
