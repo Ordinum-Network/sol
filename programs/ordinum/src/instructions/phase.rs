@@ -39,21 +39,21 @@ pub struct CreatePhase<'info> {
     #[account(
       mut,
       seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-      bump
+      bump=sponsor_account.bump
     )]
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
       mut,
       seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-      bump
+      bump=trial_account.bump
     )]
     pub trial_account: Account<'info, Trial>,
 
     #[account(
       mut,
       seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-      bump,
+      bump=coordinator_account.bump,
       constraint = coordinator_account.role == CoordinatorRole::CRC @ OrdinumError::Unauthorized,
     )]
     pub coordinator_account: Account<'info, Coordinator>,
@@ -87,19 +87,19 @@ pub struct UpdatePhase<'info> {
 
     #[account(
       seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-      bump
+      bump=sponsor_account.bump
     )]
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
       seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-      bump
+      bump=trial_account.bump
     )]
     pub trial_account: Account<'info, Trial>,
 
     #[account(
       seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-      bump,
+      bump=coordinator_account.bump,
       constraint = coordinator_account.role == CoordinatorRole::CRC @ OrdinumError::Unauthorized,
     )]
     pub coordinator_account: Account<'info, Coordinator>,
@@ -107,7 +107,7 @@ pub struct UpdatePhase<'info> {
     #[account(
       mut,
       seeds=[PHASE, trial_account.key().as_ref(), &(phase-1).to_le_bytes()],
-      bump
+      bump=phase_account.bump
     )]
     pub phase_account: Account<'info, Phase>,
 

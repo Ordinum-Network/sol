@@ -51,7 +51,7 @@ pub fn update_status(ctx: Context<UpdateTrial>, trial_id: String, sponsor_title:
 pub struct CreateTrial<'info> {
     #[account(
     seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
-    bump,
+    bump=sponsor_account.bump,
     constraint = sponsor_account.authority == signer.key() @ OrdinumError::Unauthorized
    )]
     pub sponsor_account: Account<'info, Sponsor>,

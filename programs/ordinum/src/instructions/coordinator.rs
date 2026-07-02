@@ -99,14 +99,14 @@ pub struct InitCoordinator<'info> {
     // pub escrow_account: Account<'info, Escrow>,
     #[account(
      seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
-     bump, 
+     bump=sponsor_account.bump, 
      constraint = sponsor_account.authority == signer.key() @OrdinumError::Unauthorized
    )]
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
      seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-     bump,
+     bump=trial_account.bump,
      constraint = trial_account.sponsor == sponsor_account.key() @ OrdinumError::InvalidTrial
    )]
     pub trial_account: Account<'info, Trial>,
@@ -133,20 +133,20 @@ pub struct InitCoordinatorWithPI<'info> {
     #[account(
     mut, 
     seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-    bump
+    bump=sponsor_account.bump
   )]
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
     seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump,
+    bump=trial_account.bump,
   )]
     pub trial_account: Account<'info, Trial>,
 
     #[account(
     mut,
     seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-    bump,
+    bump=coordinator.bump,
     constraint = coordinator.role == CoordinatorRole::PI @ OrdinumError::Unauthorized,
   )]
     pub coordinator: Account<'info, Coordinator>,
@@ -172,27 +172,27 @@ pub struct UpdateCoordinator<'info> {
 
     #[account(
     seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-    bump
+    bump=sponsor_account.bump
   )]
     pub sponsor_account: Account<'info, Sponsor>,
 
     #[account(
     seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump,
+    bump=trial_account.bump,
   )]
     pub trial_account: Account<'info, Trial>,
 
     #[account(
     mut,
     seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-    bump,
+    bump=coordinator.bump,
     )]
     pub coordinator: Account<'info, Coordinator>,
 
     #[account(
     mut,
     seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), coordinator_pubkey.as_ref()],
-    bump,
+    bump=coordinator_account.bump,
   )]
     pub coordinator_account: Account<'info, Coordinator>,
 

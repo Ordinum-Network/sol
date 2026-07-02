@@ -78,39 +78,39 @@ pub struct CreatePayment<'info> {
 
     #[account(
        seeds=[SPONSOR_SEED, sponsor_authority.key().as_ref(), sponsor_title.as_bytes()],
-       bump
+       bump=sponsor_account.bump
     )]
     pub sponsor_account: Box<Account<'info, Sponsor>>,
 
     #[account(
        seeds=[TRIAL_SEED, sponsor_authority.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-       bump
+       bump=trial_account.bump
     )]
     pub trial_account: Box<Account<'info, Trial>>,
 
     #[account(
        seeds=[COORDINATOR_SEED, trial_account.key().as_ref(), signer.key().as_ref()],
-       bump,
+       bump=coordinator_account.bump,
        constraint = coordinator_account.role == CoordinatorRole::CRC @ OrdinumError::Unauthorized
     )]
     pub coordinator_account: Box<Account<'info, Coordinator>>,
 
     #[account(
       seeds=[PATIENT_SEED, trial_account.key().as_ref(), reciever_wallet.key().as_ref()],
-      bump,
+      bump=patient_account.bump,
     )]
     pub patient_account: Box<Account<'info, Patient>>,
 
     #[account(
      seeds=[PHASE, trial_account.key().as_ref(), &(phase-1).to_le_bytes()],
-     bump
+     bump=phase_account.bump
     )]
     pub phase_account: Box<Account<'info, Phase>>,
 
     #[account(
       mut, 
       seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-      bump
+      bump=escrow_account.bump
     )]
     pub escrow_account: Box<Account<'info, Escrow>>,
 
@@ -123,7 +123,7 @@ pub struct CreatePayment<'info> {
 
     #[account(
       seeds=[VISIT_RECORD, trial_account.key().as_ref(), patient_account.key().as_ref(), &phase_account.phase_number.to_le_bytes(), &(patient_account.number_of_visits-1).to_le_bytes()],
-      bump
+      bump=visit_record.bump
     )]
     pub visit_record: Box<Account<'info, VisitRecord>>,
 

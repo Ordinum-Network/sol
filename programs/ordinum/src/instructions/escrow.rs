@@ -66,7 +66,7 @@ pub struct InitEscrow<'info> {
 
     #[account(
     seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
-    bump,
+    bump=sponsor_account.bump,
     constraint = sponsor_account.authority == signer.key() @ OrdinumError::Unauthorized
    )]
     pub sponsor_account: Account<'info, Sponsor>,
@@ -80,7 +80,7 @@ pub struct InitEscrow<'info> {
 
     #[account(
     seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump,
+    bump=trial_account.bump,
     constraint = trial_account.sponsor == sponsor_account.key() @ OrdinumError::InvalidTrial
    )]
     pub trial_account: Account<'info, Trial>,
@@ -176,7 +176,7 @@ pub struct UpdateEscrow<'info> {
 
     #[account(
     seeds=[SPONSOR_SEED, signer.key().as_ref(), sponsor_title.as_bytes()],
-    bump,
+    bump=sponsor_account.bump,
     constraint = sponsor_account.authority == signer.key() @ OrdinumError::Unauthorized
    )]
     pub sponsor_account: Box<Account<'info, Sponsor>>,
@@ -190,7 +190,7 @@ pub struct UpdateEscrow<'info> {
 
     #[account(
     seeds=[TRIAL_SEED, signer.key().as_ref(), trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump,
+    bump=trial_account.bump,
     constraint = trial_account.sponsor == sponsor_account.key() @ OrdinumError::InvalidTrial
    )]
     pub trial_account: Box<Account<'info, Trial>>,
@@ -198,7 +198,7 @@ pub struct UpdateEscrow<'info> {
    #[account(
     mut,
     seeds=[ESCROW_SEED, trial_id.as_bytes(), sponsor_account.key().as_ref()],
-    bump
+    bump=escrow_account.bump
    )]
    pub escrow_account: Box<Account<'info, Escrow>>,
 
